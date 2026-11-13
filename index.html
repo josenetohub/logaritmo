@@ -1,0 +1,3265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadeado Matemático - Exponencial & Logaritmos</title>
+  <style>
+    :root {
+      /* Fundo Azul Sólido */
+      --bg-page: #3b82f6;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #cbd5e1;
+
+      /* Cores dos Times (Sem emojis, design moderno e limpo) */
+      --team-a-primary: #1d4ed8;
+      --team-a-light: #eff6ff;
+      --team-a-glow: rgba(29, 78, 216, 0.45);
+
+      --team-b-primary: #e11d48;
+      --team-b-light: #fff1f2;
+      --team-b-glow: rgba(225, 29, 72, 0.45);
+
+      /* Cadeado & Foco */
+      --tumbler-focus: #f59e0b;
+      --tumbler-focus-bg: #fffbeb;
+
+      --correct-color: #16a34a;
+      --wrong-color: #dc2626;
+
+      --font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Regras Globais para Tipografia Matemática de Alto Nível */
+    sup {
+      font-size: 0.54em !important;
+      position: relative !important;
+      top: -0.65em !important;
+      margin-left: 2px !important;
+      margin-right: 2px !important;
+      line-height: 1 !important;
+      vertical-align: baseline !important;
+      font-weight: 800 !important;
+    }
+
+    sub {
+      font-size: 0.54em !important;
+      position: relative !important;
+      top: 0.32em !important;
+      margin-left: 1px !important;
+      margin-right: 2px !important;
+      line-height: 1 !important;
+      vertical-align: baseline !important;
+      font-weight: 800 !important;
+      color: inherit !important;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    /* ARENA PRINCIPAL (Sem menu horizontal superior - tela super limpa) */
+    .arena {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 230px 1fr 230px;
+      gap: 20px;
+      padding: 16px 24px;
+      max-width: 1480px;
+      margin: 0 auto;
+      width: 100%;
+      height: 100vh;
+      min-height: 620px;
+    }
+
+    /* ========================================================
+       COLUNAS DOS TIMES (Sem emojis, pulsando e brilhando na vez)
+       ======================================================== */
+    .progress-column {
+      background: #ffffff;
+      border: 3px solid #e2e8f0;
+      border-radius: 26px;
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s ease;
+    }
+
+    .progress-column.team-a {
+      border-top: 8px solid var(--team-a-primary);
+    }
+
+    .progress-column.team-b {
+      border-top: 8px solid var(--team-b-primary);
+    }
+
+    /* Efeito de brilho neon e pulsação suave no time da vez */
+    .progress-column.team-a.active-turn {
+      border-color: var(--team-a-primary);
+      transform: scale(1.025);
+      animation: pulseGlowA 2.2s infinite ease-in-out;
+      z-index: 10;
+    }
+
+    .progress-column.team-b.active-turn {
+      border-color: var(--team-b-primary);
+      transform: scale(1.025);
+      animation: pulseGlowB 2.2s infinite ease-in-out;
+      z-index: 10;
+    }
+
+    @keyframes pulseGlowA {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(29, 78, 216, 0.4), inset 0 0 12px rgba(29, 78, 216, 0.1);
+      }
+      50% {
+        box-shadow: 0 0 42px rgba(29, 78, 216, 0.8), inset 0 0 22px rgba(29, 78, 216, 0.22);
+      }
+    }
+
+    @keyframes pulseGlowB {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(225, 29, 72, 0.4), inset 0 0 12px rgba(225, 29, 72, 0.1);
+      }
+      50% {
+        box-shadow: 0 0 42px rgba(225, 29, 72, 0.8), inset 0 0 22px rgba(225, 29, 72, 0.22);
+      }
+    }
+
+    .active-pill {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: white;
+      padding: 3px 14px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+
+    .team-a.active-turn .active-pill {
+      display: flex;
+      background: var(--team-a-primary);
+      animation: bounceSmall 1.5s infinite;
+    }
+
+    .team-b.active-turn .active-pill {
+      display: flex;
+      background: var(--team-b-primary);
+      animation: bounceSmall 1.5s infinite;
+    }
+
+    @keyframes bounceSmall {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .team-header {
+      text-align: center;
+      margin-bottom: 8px;
+      width: 100%;
+    }
+
+    /* Badge visual minimalista sem emojis */
+    .team-badge-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      margin: 0 auto 6px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .team-a .team-badge-icon {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .team-b .team-badge-icon {
+      background: linear-gradient(135deg, #9f1239, #f43f5e);
+      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+    }
+
+    .team-name {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--text-main);
+      letter-spacing: 0.5px;
+    }
+
+    .team-sub {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Meta / Troféu */
+    .tower-goal {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef3c7;
+      border: 1.5px solid #fde68a;
+      color: #92400e;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .tower-goal .trophy-icon {
+      font-size: 1.2rem;
+      animation: floatTrophy 2.5s ease-in-out infinite;
+    }
+
+    @keyframes floatTrophy {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    /* Pista Vertical da Barra */
+    .tower-track-wrapper {
+      flex: 1;
+      width: 100%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      padding: 4px 0;
+    }
+
+    .tower-track {
+      width: 52px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      position: relative;
+      display: flex;
+      flex-direction: column-reverse;
+      padding: 6px;
+      border: 2px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    .tower-fill {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 0%;
+      border-radius: 999px;
+      transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 1;
+    }
+
+    .team-a .tower-fill {
+      background: linear-gradient(to top, #1e3a8a, #2563eb);
+      box-shadow: 0 0 16px var(--team-a-glow);
+    }
+
+    .team-b .tower-fill {
+      background: linear-gradient(to top, #9f1239, #f43f5e);
+      box-shadow: 0 0 16px var(--team-b-glow);
+    }
+
+    /* Degraus numéricos */
+    .tower-steps {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: space-between;
+      padding: 8px 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .tower-step-node {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #94a3b8;
+      transition: all 0.3s;
+    }
+
+    .tower-step-node.reached {
+      color: #ffffff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+      font-weight: 900;
+    }
+
+    /* Caixa de Pontos */
+    .tower-score-box {
+      margin-top: 10px;
+      width: 100%;
+      text-align: center;
+      background: #f8fafc;
+      border: 1.5px solid var(--border-color);
+      border-radius: 16px;
+      padding: 8px;
+    }
+
+    .tower-score-val {
+      font-size: 1.9rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .team-a .tower-score-val { color: var(--team-a-primary); }
+    .team-b .tower-score-val { color: var(--team-b-primary); }
+
+    .tower-score-target {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .score-quick-btns {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .btn-score-mini {
+      background: white;
+      border: 1px solid var(--border-color);
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+
+    .btn-score-mini:hover {
+      background: #f1f5f9;
+      color: var(--text-main);
+    }
+
+    /* ========================================================
+       PALCO CENTRAL INTEGRADO (Exponencial + Logaritmos)
+       ======================================================== */
+    .center-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+      border: 3px solid #e2e8f0;
+      border-radius: 30px;
+      padding: 16px 24px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Topo do Palco: Seletor de TEMA (Exponencial vs Log vs Misto) */
+    .top-info-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+
+    /* Seletor de Conteúdo / Tema */
+    .subject-tabs-group {
+      display: flex;
+      align-items: center;
+      background: #e2e8f0;
+      padding: 3px;
+      border-radius: 12px;
+      gap: 3px;
+    }
+
+    .btn-subject-tab {
+      padding: 6px 14px;
+      border-radius: 9px;
+      border: none;
+      background: transparent;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-subject-tab.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .turn-badge-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 20px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+    }
+
+    .turn-badge-center.team-a {
+      background: var(--team-a-primary);
+      box-shadow: 0 0 14px var(--team-a-glow);
+    }
+
+    .turn-badge-center.team-b {
+      background: var(--team-b-primary);
+      box-shadow: 0 0 14px var(--team-b-glow);
+    }
+
+    .progress-counter-badge {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #334155;
+      background: #f1f5f9;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Sub-barra com os 3 Jogos Padrões do Tema Escolhido */
+    .sub-presets-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .btn-preset {
+      padding: 4px 12px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-preset.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+    }
+
+    /* O Cilindro do Cadeado (Visão Vertical) */
+    .tumbler-container {
+      position: relative;
+      width: 100%;
+      max-width: 780px;
+      height: 380px;
+      overflow: hidden;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #ffffff 40%, #f8fafc 100%);
+      border-radius: 22px;
+      border: 1.5px solid #e2e8f0;
+    }
+
+    .tumbler-container::before,
+    .tumbler-container::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 95px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .tumbler-container::before {
+      top: 0;
+      background: linear-gradient(to bottom, #ffffff 20%, rgba(255, 255, 255, 0.85) 65%, transparent 100%);
+      border-bottom: 1.5px dashed rgba(203, 213, 225, 0.7);
+    }
+
+    .tumbler-container::after {
+      bottom: 0;
+      background: linear-gradient(to top, #ffffff 20%, rgba(255, 255, 255, 0.85) 65%, transparent 100%);
+      border-top: 1.5px dashed rgba(203, 213, 225, 0.7);
+    }
+
+    .lock-pointer {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 15;
+      font-size: 1.8rem;
+      color: #f59e0b;
+      animation: pointerNudge 2s infinite ease-in-out;
+      pointer-events: none;
+    }
+
+    .lock-pointer.left { left: 10px; }
+    .lock-pointer.right { right: 10px; }
+
+    @keyframes pointerNudge {
+      0%, 100% { transform: translateY(-50%) translateX(0); }
+      50% { transform: translateY(-50%) translateX(4px); }
+    }
+
+    /* Trilho vertical de questões */
+    .tumbler-track {
+      width: 100%;
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+
+    /* Slots de questão */
+    .tumbler-slot {
+      height: 110px;
+      width: 95%;
+      max-width: 730px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0;
+      border-radius: 20px;
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+    }
+
+    /* Questão Anterior (acima - meio opaco) */
+    .tumbler-slot.past {
+      opacity: 0.32;
+      transform: scale(0.85);
+      filter: blur(0.5px);
+      background: #f8fafc;
+      border: 1.5px dashed #cbd5e1;
+    }
+
+    /* Questão Futura (abaixo - meio opaco) */
+    .tumbler-slot.future {
+      opacity: 0.35;
+      transform: scale(0.85);
+      filter: blur(0.5px);
+      background: #f8fafc;
+      border: 1.5px dashed #cbd5e1;
+    }
+
+    /* Questão Central (Destaque Principal) */
+    .tumbler-slot.current {
+      opacity: 1;
+      transform: scale(1.04);
+      filter: none;
+      background: #ffffff;
+      border: 3.5px solid var(--tumbler-focus);
+      box-shadow: 0 12px 32px rgba(245, 158, 11, 0.22), 0 0 0 5px var(--tumbler-focus-bg);
+      z-index: 5;
+      height: 140px;
+    }
+
+    /* Feedback de Acerto / Erro no Card */
+    .tumbler-slot.current.anim-correct {
+      border-color: var(--correct-color) !important;
+      box-shadow: 0 0 40px rgba(34, 197, 94, 0.6), 0 0 0 6px #dcfce7 !important;
+      animation: pulseSuccess 0.6s ease-out;
+    }
+
+    .tumbler-slot.current.anim-wrong {
+      border-color: var(--wrong-color) !important;
+      box-shadow: 0 0 40px rgba(239, 68, 68, 0.6), 0 0 0 6px #fee2e2 !important;
+      animation: shakeCard 0.5s ease-in-out;
+    }
+
+    @keyframes pulseSuccess {
+      0% { transform: scale(1.04); }
+      50% { transform: scale(1.09); }
+      100% { transform: scale(1.04); }
+    }
+
+    @keyframes shakeCard {
+      0%, 100% { transform: scale(1.04) translateX(0); }
+      20%, 60% { transform: scale(1.04) translateX(-8px); }
+      40%, 80% { transform: scale(1.04) translateX(8px); }
+    }
+
+    /* Badges de Feedback Flutuante */
+    .feedback-banner {
+      position: absolute;
+      top: -16px;
+      right: 24px;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: white;
+      display: none;
+      z-index: 20;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: popIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    .feedback-banner.correct {
+      display: block;
+      background: var(--correct-color);
+    }
+
+    .feedback-banner.wrong {
+      display: block;
+      background: var(--wrong-color);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .tumbler-slot-badge {
+      position: absolute;
+      top: -12px;
+      left: 24px;
+      background: var(--tumbler-focus);
+      color: #ffffff;
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 3px 12px;
+      border-radius: 999px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      z-index: 6;
+    }
+
+    .tumbler-slot.past .tumbler-slot-badge { background: #94a3b8; }
+    .tumbler-slot.future .tumbler-slot-badge { background: #cbd5e1; color: #475569; }
+
+    /* ========================================================
+       TIPOGRAFIA MATEMÁTICA IMPECÁVEL (Sem distorção ou quebra)
+       ======================================================== */
+    .slot-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 8px 14px;
+      overflow: hidden;
+    }
+
+    .math-display-box {
+      font-family: 'Cambria Math', 'Times New Roman', serif;
+      font-size: clamp(1.7rem, 2.8vw, 2.9rem);
+      font-weight: 700;
+      color: #0f172a;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      letter-spacing: 0.4px;
+      transition: all 0.3s ease;
+      max-width: 100%;
+    }
+
+    .tumbler-slot.past .math-display-box,
+    .tumbler-slot.future .math-display-box {
+      font-size: clamp(1.4rem, 2.2vw, 2.1rem);
+    }
+
+    /* Estado quando revelado: destaca a resolução harmoniosamente */
+    .tumbler-slot.current.revealed .math-display-box {
+      color: #166534;
+      animation: popIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    /* Notação 'log' romana padronizada */
+    .m-log {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-weight: 800;
+      font-style: normal;
+      color: currentColor;
+      margin-right: 1px;
+    }
+
+    /* Sinais matemáticos com espaçamento correto */
+    .m-op {
+      margin: 0 6px;
+      font-family: system-ui, sans-serif;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    /* Tipografia de Frações Perfeita */
+    .m-frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 6px;
+      margin: 0 4px;
+      font-size: 0.9em;
+    }
+
+    .m-num {
+      border-bottom: 3px solid currentColor;
+      padding-bottom: 4px;
+      padding-top: 6px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: baseline;
+      line-height: 1;
+    }
+
+    .m-den {
+      padding-top: 5px;
+      padding-bottom: 4px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: baseline;
+      line-height: 1;
+    }
+
+    .m-rad {
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+      padding-left: 12px;
+    }
+
+    .m-rad-deg {
+      font-size: 0.45em;
+      position: absolute;
+      left: 0px;
+      top: -0.15em;
+      font-weight: 800;
+      color: #d97706;
+    }
+
+    .m-rad-sign {
+      font-size: 1.2em;
+      line-height: 1;
+      margin-right: -2px;
+    }
+
+    .m-rad-val {
+      border-top: 2.5px solid currentColor;
+      padding-top: 2px;
+      padding-left: 3px;
+      padding-right: 5px;
+    }
+
+    .m-paren {
+      font-size: 1.4em;
+      font-weight: 300;
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    /* Caixa Explicativa da Propriedade (Abaixo do cadeado) */
+    .rule-explanation-box {
+      width: 100%;
+      max-width: 720px;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 6px 18px;
+      transition: all 0.3s;
+    }
+
+    .rule-explanation-box.active {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.12);
+    }
+
+    .rule-content {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .rule-explanation-box.active .rule-placeholder { display: none; }
+    .rule-explanation-box.active .rule-content { display: flex; }
+
+    .rule-tag {
+      background: #dcfce7;
+      color: #166534;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    .rule-desc {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    /* ========================================================
+       CONTROLES DO PROFESSOR EM SEQUÊNCIA
+       (1º Só o botão Revelar, depois Acertou/Errou)
+       ======================================================== */
+    .controls-panel {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 6px;
+      min-height: 64px;
+    }
+
+    .btn-control {
+      padding: 14px 22px;
+      border-radius: 18px;
+      border: none;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      transition: all 0.18s ease;
+      color: white;
+    }
+
+    .btn-control:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    /* 1. Botão Inicial: Apenas Revelar Resultado */
+    .btn-reveal-single {
+      width: 100%;
+      max-width: 520px;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 2px solid #334155;
+      display: flex;
+      animation: popIn 0.25s ease-out;
+    }
+
+    .btn-reveal-single:hover {
+      background: linear-gradient(135deg, #334155, #1e293b);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      transform: translateY(-2px);
+    }
+
+    /* 2. Botões em Sequência: Acertou ou Errou */
+    .eval-buttons-group {
+      display: none;
+      width: 100%;
+      max-width: 580px;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      animation: popIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    .eval-buttons-group.active {
+      display: grid;
+    }
+
+    .btn-correct { background: linear-gradient(135deg, #16a34a, #15803d); }
+    .btn-correct:hover {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow: 0 8px 22px rgba(34, 197, 94, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-wrong { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .btn-wrong:hover {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      box-shadow: 0 8px 22px rgba(239, 68, 68, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-key-hint {
+      font-size: 0.74rem;
+      font-weight: 600;
+      opacity: 0.9;
+      background: rgba(0, 0, 0, 0.24);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .shortcuts-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .kbd-badge {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: monospace;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    /* ========================================================
+       BOTÕES FLUTUANTES DISCRETOS NO CANTO (Menu Limpo)
+       ======================================================== */
+    .floating-tools {
+      position: fixed;
+      bottom: 14px;
+      right: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(6px);
+      padding: 6px 12px;
+      border-radius: 999px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      border: 1.5px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .btn-tool-mini {
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #334155;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-tool-mini:hover {
+      background: #f1f5f9;
+      transform: translateY(-1px);
+    }
+
+    /* ========================================================
+       MODAIS E TELAS SOBREPOSTAS
+       ======================================================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-card {
+      background: white;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 860px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+      animation: modalSlide 0.3s ease-out;
+      overflow: hidden;
+    }
+
+    @keyframes modalSlide {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 16px 24px;
+      border-bottom: 1.5px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+    }
+
+    .modal-header h2 { font-size: 1.25rem; font-weight: 800; color: #1e293b; }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      color: #64748b;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+    }
+
+    .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+
+    /* Grade de Propriedades no Mural */
+    .prop-reference-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .prop-card {
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 1.5px solid #e2e8f0;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .prop-card-tag {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 8px;
+      color: white;
+      text-transform: uppercase;
+    }
+
+    .tag-p1 { background: #ec4899; }
+    .tag-p2 { background: #3b82f6; }
+    .tag-p3 { background: #84cc16; color: #14532d; }
+    .tag-p4 { background: #f97316; }
+    .tag-p5 { background: #a855f7; }
+    .tag-p6 { background: #eab308; color: #713f12; }
+    .tag-p7 { background: #ef4444; }
+    .tag-p8 { background: #06b6d4; }
+
+    .prop-card-math {
+      font-family: 'Cambria Math', 'Times New Roman', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    /* Tela de Vitória */
+    .victory-modal { text-align: center; padding: 30px; }
+
+    .victory-trophy {
+      font-size: 5rem;
+      animation: victoryPulse 1s infinite alternate;
+    }
+
+    @keyframes victoryPulse {
+      0% { transform: scale(1) rotate(-5deg); }
+      100% { transform: scale(1.15) rotate(5deg); }
+    }
+
+    .victory-title { font-size: 2.4rem; font-weight: 900; margin: 12px 0; color: #1e293b; }
+
+    .victory-winner-banner {
+      font-size: 1.8rem;
+      font-weight: 800;
+      padding: 10px 24px;
+      border-radius: 999px;
+      color: white;
+      display: inline-block;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .victory-stats { font-size: 1.1rem; color: #64748b; margin-bottom: 24px; }
+
+    /* Configurações Form */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.85rem; font-weight: 700; color: #334155; }
+    .form-group input, .form-group select {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border-color);
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 150;
+    }
+
+    /* ========================================================
+       QUADRO DE GIZ ESCOLAR (SESSÃO DE APRENDIZADO CONDENSADA)
+       ======================================================== */
+    .btn-learn-action {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-learn-action:hover {
+      background: linear-gradient(135deg, #047857, #059669);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.45);
+    }
+
+    .chalkboard-container {
+      background: #143827;
+      background-image: 
+        radial-gradient(circle at 50% 40%, rgba(30, 85, 58, 0.85) 0%, rgba(13, 39, 26, 0.98) 100%),
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0, rgba(255, 255, 255, 0.015) 1px, transparent 0, transparent 8px);
+      border: 14px solid #5a3517;
+      border-radius: 22px;
+      box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.75),
+        inset 0 0 50px rgba(0, 0, 0, 0.6),
+        0 0 0 3px #381f0d;
+      max-width: 1680px;
+      width: 97vw;
+      height: 90vh;
+      min-height: 680px;
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      color: #f8fafc;
+      overflow: hidden;
+      animation: modalSlide 0.28s ease-out;
+    }
+
+    /* Topo do Quadro */
+    .chalk-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 28px;
+      border-bottom: 3px dashed rgba(255, 255, 255, 0.2);
+      flex-wrap: wrap;
+    }
+
+    .chalk-title {
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: #fef08a; /* Giz Amarelo Claro */
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-shadow: 0 0 8px rgba(254, 240, 138, 0.35);
+    }
+
+    .chalk-tabs {
+      display: flex;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-chalk-tab {
+      background: transparent;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      color: #cbd5e1;
+      font-size: 1.08rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-chalk-tab.active {
+      background: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .chalk-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-chalk-action {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      padding: 9px 20px;
+      border-radius: 999px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-chalk-action:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn-chalk-action.primary {
+      background: #facc15;
+      color: #0f172a;
+      border-color: #fde047;
+      box-shadow: 0 0 14px rgba(250, 204, 21, 0.4);
+    }
+
+    .btn-chalk-action.primary:hover {
+      background: #fde047;
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    .btn-chalk-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 2.3rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 10px;
+      transition: color 0.15s;
+    }
+
+    .btn-chalk-close:hover { color: #f87171; }
+
+    /* Superfície de Giz (Área das Propriedades) */
+    .chalk-board-surface {
+      flex: 1;
+      padding: 22px 30px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.2) transparent;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chalk-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .chalk-grid.single-col {
+      grid-template-columns: 1fr;
+      max-width: 1250px;
+      margin: 0 auto;
+      gap: 18px;
+      width: 100%;
+    }
+
+    /* Linha / Card de cada Propriedade no Quadro */
+    .chalk-item {
+      background: rgba(0, 0, 0, 0.28);
+      border: 2px solid rgba(255, 255, 255, 0.16);
+      border-left: 7px solid #fde047;
+      border-radius: 14px;
+      padding: 16px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      position: relative;
+    }
+
+    .chalk-item.hidden {
+      display: none;
+    }
+
+    .chalk-item.revealed {
+      animation: chalkWriteIn 0.38s ease-out;
+    }
+
+    .chalk-item.just-revealed {
+      box-shadow: 0 0 24px rgba(253, 224, 71, 0.4);
+      border-color: #fde047;
+    }
+
+    @keyframes chalkWriteIn {
+      0% { opacity: 0; transform: translateY(12px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .chalk-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .chalk-badge {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #0f172a;
+      background: #fde047;
+      padding: 3px 12px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .chalk-item-name {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: #93c5fd; /* Giz Azul Claro */
+      letter-spacing: 0.4px;
+    }
+
+    .chalk-rule-summary {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #86efac; /* Giz Verde Menta */
+      margin-left: auto;
+    }
+
+    /* Fórmula em Giz no Quadro */
+    .chalk-formula-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 4px 0;
+      flex-wrap: wrap;
+    }
+
+    .chalk-math {
+      font-family: 'Cambria Math', 'Times New Roman', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+      white-space: nowrap;
+    }
+
+    .chalk-arrow {
+      color: #fde047;
+      font-weight: 900;
+      font-size: 1.9rem;
+    }
+
+    .chalk-example {
+      font-family: 'Cambria Math', 'Times New Roman', serif;
+      font-size: 2.05rem;
+      font-weight: 700;
+      color: #7dd3fc; /* Giz Ciano */
+      background: rgba(125, 211, 252, 0.12);
+      padding: 4px 16px;
+      border-radius: 10px;
+      border: 1.5px dashed rgba(125, 211, 252, 0.5);
+      white-space: nowrap;
+    }
+
+    .chalk-caution {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: #fca5a5; /* Giz Rosa / Vermelho Claro */
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .chalk-caution small {
+      font-size: 1.02rem;
+      font-weight: 700;
+    }
+
+    /* Prateleira / Porta-Giz (Chalk Tray) */
+    .chalk-tray {
+      background: #452a13;
+      border-top: 4px solid #6b4423;
+      padding: 12px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .chalk-pieces {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .chalk-stick {
+      width: 44px;
+      height: 12px;
+      border-radius: 3px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .chalk-stick.white { background: #f8fafc; }
+    .chalk-stick.yellow { background: #fde047; }
+    .chalk-stick.blue { background: #7dd3fc; }
+
+    .chalk-eraser {
+      width: 75px;
+      height: 18px;
+      background: #1c1917;
+      border-top: 4px solid #78350f;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      margin-left: 8px;
+    }
+
+    .chalk-counter-info {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fef08a;
+    }
+
+    .btn-chalk-practice {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 12px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-chalk-practice:hover {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 900px) {
+      .chalk-grid { grid-template-columns: 1fr; }
+      .chalk-math { font-size: 1.4rem; }
+      .chalk-example { font-size: 1.3rem; }
+      .chalk-actions { flex-wrap: wrap; }
+    }
+
+    @media (max-width: 950px) {
+      .arena { grid-template-columns: 170px 1fr 170px; padding: 10px; }
+      .math-display-box { font-size: 1.8rem; }
+      .controls-panel { width: 100%; }
+      .eval-buttons-group { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Confetti Canvas para Celebração -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- ARENA PRINCIPAL (Fundo Azul Sólido, Design Limpo e Integrado) -->
+  <main class="arena">
+
+    <!-- Coluna Esquerda: Time A (Meninos / Time Azul - Sem emojis, visual moderno) -->
+    <aside class="progress-column team-a active-turn" id="teamAColumn">
+      <div class="active-pill">⚡ NA VEZ</div>
+      <div class="team-header">
+        <div class="team-badge-icon">A</div>
+        <div class="team-name" id="teamANameDisplay">MENINOS</div>
+        <div class="team-sub">Time Azul</div>
+      </div>
+
+      <div class="tower-goal">
+        <span class="trophy-icon">🏆</span>
+        <span>Meta: <strong id="teamAGoalDisplay">10</strong> pts</span>
+      </div>
+
+      <div class="tower-track-wrapper">
+        <div class="tower-track">
+          <div class="tower-fill" id="teamAFill"></div>
+          <div class="tower-steps" id="teamASteps"></div>
+        </div>
+      </div>
+
+      <div class="tower-score-box">
+        <div class="tower-score-val" id="teamAScore">0</div>
+        <div class="tower-score-target">de <span class="goal-text">10</span> pontos</div>
+        <div class="score-quick-btns">
+          <button class="btn-score-mini" onclick="adjustScore('A', -1)" title="Diminuir ponto">-</button>
+          <button class="btn-score-mini" onclick="adjustScore('A', 1)" title="Adicionar ponto">+</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Centro: Palco do Cadeado com SELETOR DE CONTEÚDO INTEGRADO -->
+    <section class="center-stage">
+      
+      <!-- Topo Integrado: Seletor de Matéria (Exponencial vs Logaritmos vs Misto) + Vez + Contador -->
+      <div class="top-info-bar">
+        
+        <!-- Abas de Integração de Conteúdo -->
+        <div class="subject-tabs-group">
+          <button class="btn-subject-tab active" id="tabExp" onclick="setSubject('exp')" title="Propriedades da Potenciação e Exponencial">
+            ⚡ Exponencial
+          </button>
+          <button class="btn-subject-tab" id="tabLog" onclick="setSubject('log')" title="Propriedades dos Logaritmos">
+            📐 Logaritmos
+          </button>
+          <button class="btn-subject-tab" id="tabMixed" onclick="setSubject('mixed')" title="Mix Exponencial + Logaritmos">
+            🔥 Misto
+          </button>
+        </div>
+
+        <!-- Indicador da Vez do Time (Sem emojis) -->
+        <div class="turn-badge-center team-a" id="turnBadgeCenter" onclick="switchTurn()" title="Clique para alternar o time">
+          <span id="turnBadgeText">VEZ: MENINOS</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <!-- Botão Direto para Sessão de Aprendizado -->
+          <button class="btn-learn-action" onclick="openLearningModal()" title="Abrir Sessão de Aprendizado e Aulas Passo a Passo">
+            🎓 Modo Aprendizado
+          </button>
+
+          <!-- Contador da Pergunta Atual -->
+          <div class="progress-counter-badge" id="questionCounterBadge">
+            Pergunta: <strong>1 / 10</strong>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Seletor dos 3 Jogos Padrões do Tema Ativo -->
+      <div class="sub-presets-bar">
+        <button class="btn-preset active" id="btnPreset1" onclick="loadGamePreset(1)"></button>
+        <button class="btn-preset" id="btnPreset2" onclick="loadGamePreset(2)"></button>
+        <button class="btn-preset" id="btnPreset3" onclick="loadGamePreset(3)"></button>
+      </div>
+
+      <!-- O Cilindro do Cadeado (Visão Vertical) -->
+      <div class="tumbler-container">
+        <div class="lock-pointer left">▶</div>
+        <div class="lock-pointer right">◀</div>
+
+        <div class="tumbler-track" id="tumblerTrack">
+          
+          <!-- Card Anterior (Acima - Meio Opaco) -->
+          <div class="tumbler-slot past" id="slotPast">
+            <span class="tumbler-slot-badge">ANTERIOR</span>
+            <div class="slot-content">
+              <div class="math-display-box" id="pastMath">---</div>
+            </div>
+          </div>
+
+          <!-- Card Atual (Centro - Destaque com fórmula harmoniosa sem quebras) -->
+          <div class="tumbler-slot current" id="slotCurrent">
+            <span class="tumbler-slot-badge" id="currentSlotBadge">CÓDIGO #1</span>
+            
+            <!-- Badges Flutuantes de Acerto / Erro -->
+            <div class="feedback-banner" id="feedbackBanner">ACERTOU! +1 PONTO</div>
+
+            <div class="slot-content">
+              <div class="math-display-box" id="currentMathDisplay">
+                <!-- Renderização tipográfica pura -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Futuro (Abaixo - Meio Opaco) -->
+          <div class="tumbler-slot future" id="slotFuture">
+            <span class="tumbler-slot-badge">A SEGUIR</span>
+            <div class="slot-content">
+              <div class="math-display-box" id="futureMath">---</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Caixa Explicativa da Propriedade (Abaixo do cadeado) -->
+      <div class="rule-explanation-box" id="ruleBox">
+        <div class="rule-placeholder">
+          <span>💡 Clique em <strong>"Revelar Resultado"</strong> para conferir a adaptação</span>
+        </div>
+        <div class="rule-content" id="ruleContent">
+          <div class="rule-tag" id="ruleTag">⚡ Propriedade</div>
+          <div class="rule-desc" id="ruleDesc">Explicação pedagógica da propriedade</div>
+        </div>
+      </div>
+
+      <!-- PAINEL DE CONTROLES EM SEQUÊNCIA:
+           Primeiro só 1 botão para revelar, depois surgem os botões acertou / errou -->
+      <div class="controls-panel">
+        
+        <!-- FASE 1: Só um botão de Revelar Resultado -->
+        <button class="btn-control btn-reveal-single" id="btnRevealSingle" onclick="revealAnswer()" title="Revelar a resposta e adaptação">
+          <span>👁️ Revelar Resultado</span>
+          <span class="btn-key-hint">[Espaço] ou [Enter]</span>
+        </button>
+
+        <!-- FASE 2: Em sequência, surgem os botões de Acertou ou Errou -->
+        <div class="eval-buttons-group" id="evalButtonsGroup">
+          <button class="btn-control btn-wrong" onclick="handleAnswer(false)" title="Aluno errou ou passou a vez">
+            <span>❌ Errou / Passou</span>
+            <span class="btn-key-hint">[←] ou [Backspace]</span>
+          </button>
+          <button class="btn-control btn-correct" onclick="handleAnswer(true)" title="Aluno acertou (+1 ponto)">
+            <span>✅ Acertou! (+1 pt)</span>
+            <span class="btn-key-hint">[→] ou [Enter]</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Atalhos de Teclado -->
+      <div class="shortcuts-bar">
+        <span>Fila: Respondeu ➜ Fim da fila!</span>
+        <span>•</span>
+        <span id="shortcutHintDynamic"><span class="kbd-badge">Espaço / Enter</span> Revelar Resultado</span>
+        <span>•</span>
+        <span><span class="kbd-badge">A</span> Modo Aula</span>
+        <span><span class="kbd-badge">T</span> Trocar Vez</span>
+        <span><span class="kbd-badge">M</span> Mural</span>
+      </div>
+
+    </section>
+
+    <!-- Coluna Direita: Time B (Meninas / Time Rosa - Sem emojis, visual moderno) -->
+    <aside class="progress-column team-b" id="teamBColumn">
+      <div class="active-pill">⚡ NA VEZ</div>
+      <div class="team-header">
+        <div class="team-badge-icon">B</div>
+        <div class="team-name" id="teamBNameDisplay">MENINAS</div>
+        <div class="team-sub">Time Rosa</div>
+      </div>
+
+      <div class="tower-goal">
+        <span class="trophy-icon">🏆</span>
+        <span>Meta: <strong id="teamBGoalDisplay">10</strong> pts</span>
+      </div>
+
+      <div class="tower-track-wrapper">
+        <div class="tower-track">
+          <div class="tower-fill" id="teamBFill"></div>
+          <div class="tower-steps" id="teamBSteps"></div>
+        </div>
+      </div>
+
+      <div class="tower-score-box">
+        <div class="tower-score-val" id="teamBScore">0</div>
+        <div class="tower-score-target">de <span class="goal-text">10</span> pontos</div>
+        <div class="score-quick-btns">
+          <button class="btn-score-mini" onclick="adjustScore('B', -1)" title="Diminuir ponto">-</button>
+          <button class="btn-score-mini" onclick="adjustScore('B', 1)" title="Adicionar ponto">+</button>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Botões Flutuantes Discretos no Canto Inferior Direito (Substitui menu superior) -->
+  <div class="floating-tools">
+    <button class="btn-tool-mini" onclick="openLearningModal()" title="Sessão de Aprendizado com explicação passo a passo">
+      🎓 Modo Aprendizado
+    </button>
+    <button class="btn-tool-mini" onclick="toggleMuralModal()" title="Mural com as propriedades e imagens dos mapas mentais">
+      📋 Mural de Regras
+    </button>
+    <button class="btn-tool-mini" id="btnSoundToggle" onclick="toggleSound()" title="Ativar/Desativar som">
+      <span id="soundIcon">🔊</span> Som
+    </button>
+    <button class="btn-tool-mini" onclick="toggleSettingsModal()" title="Configurações de perguntas e times">
+      ⚙️ Config
+    </button>
+    <button class="btn-tool-mini" onclick="toggleFullscreen()" title="Modo Projetor Tela Cheia">
+      ⛶ Tela Cheia
+    </button>
+  </div>
+
+  <!-- MODAL: Quadro de Giz Escolar (Sessão de Aprendizado Condensada) -->
+  <div class="modal-overlay" id="learningModal" onclick="closeModalOnOverlay(event, 'learningModal')">
+    <div class="chalkboard-container">
+      
+      <!-- Topo do Quadro de Giz -->
+      <div class="chalk-top-bar">
+        <div class="chalk-title">
+          <span>📋 QUADRO DE PROPRIEDADES</span>
+        </div>
+
+        <!-- Abas de Matéria -->
+        <div class="chalk-tabs">
+          <button class="btn-chalk-tab active" id="chalkTabExp" onclick="setChalkSubject('exp')" title="Propriedades da Potenciação e Exponencial">
+            ⚡ Exponencial (8)
+          </button>
+          <button class="btn-chalk-tab" id="chalkTabLog" onclick="setChalkSubject('log')" title="Propriedades dos Logaritmos">
+            📐 Logaritmos (5)
+          </button>
+        </div>
+
+        <!-- Ações do Quadro -->
+        <div class="chalk-actions">
+          <button class="btn-chalk-action primary" id="btnRevealNextChalk" onclick="revealNextChalkItem()" title="Fazer aparecer a próxima propriedade no quadro">
+            <span>➕ Revelar Próxima [Espaço]</span>
+          </button>
+          <button class="btn-chalk-action" onclick="revealAllChalkItems()" title="Mostrar todas as propriedades no quadro">
+            <span>👁️ Mostrar Todas</span>
+          </button>
+          <button class="btn-chalk-action" onclick="clearChalkboard()" title="Limpar o quadro para ensinar do início">
+            <span>🧹 Limpar Quadro</span>
+          </button>
+          <button class="btn-chalk-close" onclick="closeLearningModal()" title="Fechar o quadro">&times;</button>
+        </div>
+      </div>
+
+      <!-- Superfície de Giz (Área das Propriedades) -->
+      <div class="chalk-board-surface">
+        <div class="chalk-grid" id="chalkGrid">
+          <!-- Renderizado dinamicamente com animação de giz -->
+        </div>
+      </div>
+
+      <!-- Prateleira de Madeira com Giz e Apagador (Chalk Tray) -->
+      <div class="chalk-tray">
+        <div class="chalk-pieces">
+          <div class="chalk-stick white" title="Giz Branco"></div>
+          <div class="chalk-stick yellow" title="Giz Amarelo"></div>
+          <div class="chalk-stick blue" title="Giz Azul"></div>
+          <div class="chalk-eraser" title="Apagador de Feltro"></div>
+          <span class="chalk-counter-info" id="chalkCounterInfo">No quadro: 1 de 8</span>
+        </div>
+
+        <button class="btn-chalk-practice" onclick="practiceCurrentLearnSubject()" title="Ir para o Jogo Cadeado com esta matéria">
+          <span>🚀 Praticar no Jogo Cadeado</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: Mural de Regras (Exibe Exponencial ou Logaritmos de acordo com o tema) -->
+  <div class="modal-overlay" id="muralModal" onclick="closeModalOnOverlay(event, 'muralModal')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="muralTitle">📋 Mural das Propriedades</h2>
+        <button class="modal-close-btn" onclick="toggleMuralModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="muralBody">
+        <!-- Renderizado dinamicamente com base no tema ativo -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Configurações do Jogo -->
+  <div class="modal-overlay" id="settingsModal" onclick="closeModalOnOverlay(event, 'settingsModal')">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2>⚙️ Configurar Partida</h2>
+        <button class="modal-close-btn" onclick="toggleSettingsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="settings-grid">
+          <div class="form-group">
+            <label for="inputTeamAName">Nome do Time 1 (Azul):</label>
+            <input type="text" id="inputTeamAName" value="MENINOS">
+          </div>
+          <div class="form-group">
+            <label for="inputTeamBName">Nome do Time 2 (Rosa):</label>
+            <input type="text" id="inputTeamBName" value="MENINAS">
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <div class="form-group">
+            <label for="inputQuestionCount">Quantidade de Perguntas:</label>
+            <select id="inputQuestionCount">
+              <option value="5">5 perguntas (Rápido)</option>
+              <option value="10" selected>10 perguntas (Padrão)</option>
+              <option value="15">15 perguntas (Médio)</option>
+              <option value="20">20 perguntas (Turma Grande)</option>
+              <option value="30">30 perguntas (Maratona)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="inputTargetScore">Meta de Pontos (Trophy):</label>
+            <select id="inputTargetScore">
+              <option value="5">5 pontos</option>
+              <option value="10" selected>10 pontos</option>
+              <option value="15">15 pontos</option>
+              <option value="20">20 pontos</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputBgColor">Tom do Azul Sólido de Fundo:</label>
+          <select id="inputBgColor" onchange="changeBgColor(this.value)">
+            <option value="#3b82f6" selected>Azul Vibrante (#3b82f6)</option>
+            <option value="#2563eb">Azul Real (#2563eb)</option>
+            <option value="#1d4ed8">Azul Escuro (#1d4ed8)</option>
+            <option value="#60a5fa">Azul Céu Claro (#60a5fa)</option>
+            <option value="#0284c7">Azul Oceano (#0284c7)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end;">
+          <button class="btn-control" onclick="resetMatch(true)" style="background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c;">
+            <span>🔄 Reiniciar Jogo</span>
+          </button>
+          <button class="btn-control btn-correct" onclick="applySettings()">
+            <span>💾 Salvar e Aplicar</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Vitória -->
+  <div class="modal-overlay" id="victoryModal">
+    <div class="modal-card victory-modal" style="max-width: 520px;">
+      <div class="victory-trophy">🏆</div>
+      <h2 class="victory-title">FIM DE JOGO!</h2>
+      <div class="victory-winner-banner" id="victoryWinnerBanner">MENINOS VENCERAM!</div>
+      <p class="victory-stats" id="victoryStats"></p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="btn-control btn-reveal-single" onclick="closeVictoryModal()">
+          <span>Ver Tabuleiro</span>
+        </button>
+        <button class="btn-control btn-correct" onclick="resetMatch(true); closeVictoryModal();">
+          <span>🔄 Jogar Novamente</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ========================================================
+       BANCO DE QUESTÕES EXPONENCIAIS
+       Formatadas para visualização nítida, sem quebras
+       ======================================================== */
+    const EXP_PRESETS = {
+      p1: [ // Básicas (P1, P2 e P3)
+        {
+          tag: 'P3: Potência de Potência',
+          exprHtml: '(2<sup>3</sup>)<sup>3</sup>',
+          ansHtml: '(2<sup>3</sup>)<sup>3</sup>&nbsp;=&nbsp;2<sup>3 &sdot; 3</sup>&nbsp;=&nbsp;<strong>2<sup>9</sup></strong>',
+          explanation: 'Multiplicação dos expoentes: 3 &sdot; 3 = 9'
+        },
+        {
+          tag: 'P1: Produto de Mesma Base',
+          exprHtml: '2<sup>3</sup> &sdot; 2<sup>4</sup>',
+          ansHtml: '2<sup>3</sup> &sdot; 2<sup>4</sup>&nbsp;=&nbsp;2<sup>3 + 4</sup>&nbsp;=&nbsp;<strong>2<sup>7</sup></strong>',
+          explanation: 'Conserva a base 2 e soma os expoentes: 3 + 4 = 7'
+        },
+        {
+          tag: 'P2: Divisão de Mesma Base',
+          exprHtml: '<span class="m-frac"><span class="m-num">2<sup>7</sup></span><span class="m-den">2<sup>4</sup></span></span>',
+          ansHtml: '<span class="m-frac"><span class="m-num">2<sup>7</sup></span><span class="m-den">2<sup>4</sup></span></span>&nbsp;=&nbsp;2<sup>7 &minus; 4</sup>&nbsp;=&nbsp;<strong>2<sup>3</sup></strong>',
+          explanation: 'Conserva a base 2 e subtrai os expoentes: 7 &minus; 4 = 3'
+        },
+        {
+          tag: 'P1: Produto de Mesma Base',
+          exprHtml: '3<sup>2</sup> &sdot; 3<sup>5</sup>',
+          ansHtml: '3<sup>2</sup> &sdot; 3<sup>5</sup>&nbsp;=&nbsp;3<sup>2 + 5</sup>&nbsp;=&nbsp;<strong>3<sup>7</sup></strong>',
+          explanation: 'Soma dos expoentes: 2 + 5 = 7'
+        },
+        {
+          tag: 'P3: Potência de Potência',
+          exprHtml: '(3<sup>2</sup>)<sup>4</sup>',
+          ansHtml: '(3<sup>2</sup>)<sup>4</sup>&nbsp;=&nbsp;3<sup>2 &sdot; 4</sup>&nbsp;=&nbsp;<strong>3<sup>8</sup></strong>',
+          explanation: 'Multiplicação dos expoentes: 2 &sdot; 4 = 8'
+        },
+        {
+          tag: 'P2: Divisão de Mesma Base',
+          exprHtml: '<span class="m-frac"><span class="m-num">5<sup>6</sup></span><span class="m-den">5<sup>2</sup></span></span>',
+          ansHtml: '<span class="m-frac"><span class="m-num">5<sup>6</sup></span><span class="m-den">5<sup>2</sup></span></span>&nbsp;=&nbsp;5<sup>6 &minus; 2</sup>&nbsp;=&nbsp;<strong>5<sup>4</sup></strong>',
+          explanation: 'Subtração dos expoentes: 6 &minus; 2 = 4'
+        },
+        {
+          tag: 'P1: Produto de Mesma Base',
+          exprHtml: '10<sup>3</sup> &sdot; 10<sup>5</sup>',
+          ansHtml: '10<sup>3</sup> &sdot; 10<sup>5</sup>&nbsp;=&nbsp;10<sup>3 + 5</sup>&nbsp;=&nbsp;<strong>10<sup>8</sup></strong>',
+          explanation: 'Soma dos expoentes: 3 + 5 = 8'
+        },
+        {
+          tag: 'P3: Potência de Potência',
+          exprHtml: '(5<sup>3</sup>)<sup>2</sup>',
+          ansHtml: '(5<sup>3</sup>)<sup>2</sup>&nbsp;=&nbsp;5<sup>3 &sdot; 2</sup>&nbsp;=&nbsp;<strong>5<sup>6</sup></strong>',
+          explanation: 'Multiplicação dos expoentes: 3 &sdot; 2 = 6'
+        },
+        {
+          tag: 'P2: Divisão de Mesma Base',
+          exprHtml: '<span class="m-frac"><span class="m-num">10<sup>9</sup></span><span class="m-den">10<sup>3</sup></span></span>',
+          ansHtml: '<span class="m-frac"><span class="m-num">10<sup>9</sup></span><span class="m-den">10<sup>3</sup></span></span>&nbsp;=&nbsp;10<sup>9 &minus; 3</sup>&nbsp;=&nbsp;<strong>10<sup>6</sup></strong>',
+          explanation: 'Subtração dos expoentes: 9 &minus; 3 = 6'
+        },
+        {
+          tag: 'P3: Potência com Variável',
+          exprHtml: '(x<sup>4</sup>)<sup>5</sup>',
+          ansHtml: '(x<sup>4</sup>)<sup>5</sup>&nbsp;=&nbsp;x<sup>4 &sdot; 5</sup>&nbsp;=&nbsp;<strong>x<sup>20</sup></strong>',
+          explanation: 'Multiplicação dos expoentes: 4 &sdot; 5 = 20'
+        }
+      ],
+      p2: [ // Inversões e Produtos (P4, P5, P6, P7)
+        {
+          tag: 'P4: Potência de um Produto',
+          exprHtml: '(2 &sdot; 3)<sup>4</sup>',
+          ansHtml: '(2 &sdot; 3)<sup>4</sup>&nbsp;=&nbsp;<strong>2<sup>4</sup> &sdot; 3<sup>4</sup></strong>',
+          explanation: 'Distribui o expoente 4 para os dois fatores'
+        },
+        {
+          tag: 'P6: Expoente Negativo',
+          exprHtml: '2<sup>&minus;3</sup>',
+          ansHtml: '2<sup>&minus;3</sup>&nbsp;=&nbsp;<span class="m-frac"><span class="m-num">1</span><span class="m-den">2<sup>3</sup></span></span>&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">1</span><span class="m-den">8</span></span></strong>',
+          explanation: 'Inverte a base e o expoente fica positivo 3'
+        },
+        {
+          tag: 'P5: Potência de um Quociente',
+          exprHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">2</span><span class="m-den">3</span></span><span class="m-paren">)</span><sup>4</sup>',
+          ansHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">2</span><span class="m-den">3</span></span><span class="m-paren">)</span><sup>4</sup>&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">2<sup>4</sup></span><span class="m-den">3<sup>4</sup></span></span></strong>',
+          explanation: 'Eleva numerador e denominador à 4ª potência'
+        },
+        {
+          tag: 'P7: Fração com Expoente Negativo',
+          exprHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">2</span><span class="m-den">3</span></span><span class="m-paren">)</span><sup>&minus;2</sup>',
+          ansHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">2</span><span class="m-den">3</span></span><span class="m-paren">)</span><sup>&minus;2</sup>&nbsp;=&nbsp;<span class="m-paren">(</span><span class="m-frac"><span class="m-num">3</span><span class="m-den">2</span></span><span class="m-paren">)</span><sup>2</sup>&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">9</span><span class="m-den">4</span></span></strong>',
+          explanation: 'Inverte a fração interna e troca o sinal do expoente'
+        },
+        {
+          tag: 'P4: Potência de Produto com Variável',
+          exprHtml: '(5 &sdot; x)<sup>3</sup>',
+          ansHtml: '(5 &sdot; x)<sup>3</sup>&nbsp;=&nbsp;5<sup>3</sup> &sdot; x<sup>3</sup>&nbsp;=&nbsp;<strong>125x<sup>3</sup></strong>',
+          explanation: 'Distribui o cubo: 5³ = 125'
+        },
+        {
+          tag: 'P6: Expoente Negativo',
+          exprHtml: '5<sup>&minus;2</sup>',
+          ansHtml: '5<sup>&minus;2</sup>&nbsp;=&nbsp;<span class="m-frac"><span class="m-num">1</span><span class="m-den">5<sup>2</sup></span></span>&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">1</span><span class="m-den">25</span></span></strong>',
+          explanation: 'Inverte a base para 1 / 5² = 1 / 25'
+        },
+        {
+          tag: 'P5: Potência de Quociente',
+          exprHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">x</span><span class="m-den">5</span></span><span class="m-paren">)</span><sup>3</sup>',
+          ansHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">x</span><span class="m-den">5</span></span><span class="m-paren">)</span><sup>3</sup>&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">x<sup>3</sup></span><span class="m-den">125</span></span></strong>',
+          explanation: 'Eleva numerador e denominador à 3ª potência'
+        },
+        {
+          tag: 'P7: Inversão de Fração',
+          exprHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">3</span><span class="m-den">5</span></span><span class="m-paren">)</span><sup>&minus;3</sup>',
+          ansHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">3</span><span class="m-den">5</span></span><span class="m-paren">)</span><sup>&minus;3</sup>&nbsp;=&nbsp;<span class="m-paren">(</span><span class="m-frac"><span class="m-num">5</span><span class="m-den">3</span></span><span class="m-paren">)</span><sup>3</sup>&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">125</span><span class="m-den">27</span></span></strong>',
+          explanation: 'Inverte para 5/3 com expoente positivo 3'
+        },
+        {
+          tag: 'P6: Potência de Base 10',
+          exprHtml: '10<sup>&minus;4</sup>',
+          ansHtml: '10<sup>&minus;4</sup>&nbsp;=&nbsp;<span class="m-frac"><span class="m-num">1</span><span class="m-den">10<sup>4</sup></span></span>&nbsp;=&nbsp;<strong>0,0001</strong>',
+          explanation: 'Inverte para 1 sobre 10000 = 0,0001'
+        },
+        {
+          tag: 'P7: Inversão Simples',
+          exprHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">1</span><span class="m-den">4</span></span><span class="m-paren">)</span><sup>&minus;2</sup>',
+          ansHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">1</span><span class="m-den">4</span></span><span class="m-paren">)</span><sup>&minus;2</sup>&nbsp;=&nbsp;4<sup>2</sup>&nbsp;=&nbsp;<strong>16</strong>',
+          explanation: 'O inverso de 1/4 é 4, ficando 4² = 16'
+        }
+      ],
+      p3: [ // Geral & Radicais (P1 a P8)
+        {
+          tag: 'P3: Potência de Potência',
+          exprHtml: '(2<sup>3</sup>)<sup>3</sup>',
+          ansHtml: '(2<sup>3</sup>)<sup>3</sup>&nbsp;=&nbsp;2<sup>3 &sdot; 3</sup>&nbsp;=&nbsp;<strong>2<sup>9</sup></strong>',
+          explanation: '3 &sdot; 3 = 9'
+        },
+        {
+          tag: 'P1: Produto com Expoente Negativo',
+          exprHtml: '5<sup>6</sup> &sdot; 5<sup>&minus;2</sup>',
+          ansHtml: '5<sup>6</sup> &sdot; 5<sup>&minus;2</sup>&nbsp;=&nbsp;5<sup>6 + (&minus;2)</sup>&nbsp;=&nbsp;<strong>5<sup>4</sup></strong>',
+          explanation: 'Soma com sinal: 6 &minus; 2 = 4'
+        },
+        {
+          tag: 'P8: Expoente Fracionário (Radical)',
+          exprHtml: '2<sup><span class="m-frac"><span class="m-num">3</span><span class="m-den">4</span></span></sup>',
+          ansHtml: '2<sup><span class="m-frac"><span class="m-num">3</span><span class="m-den">4</span></span></sup>&nbsp;=&nbsp;<span class="m-rad"><sup class="m-rad-deg">4</sup><span class="m-rad-sign">√</span><span class="m-rad-val">2<sup>3</sup></span></span>&nbsp;=&nbsp;<strong><span class="m-rad"><sup class="m-rad-deg">4</sup><span class="m-rad-sign">√</span><span class="m-rad-val">8</span></span></strong>',
+          explanation: 'O denominador 4 vira o índice da raiz quarta'
+        },
+        {
+          tag: 'P2: Divisão com Expoente Negativo',
+          exprHtml: '<span class="m-frac"><span class="m-num">7<sup>4</sup></span><span class="m-den">7<sup>6</sup></span></span>',
+          ansHtml: '<span class="m-frac"><span class="m-num">7<sup>4</sup></span><span class="m-den">7<sup>6</sup></span></span>&nbsp;=&nbsp;7<sup>4 &minus; 6</sup>&nbsp;=&nbsp;<strong>7<sup>&minus;2</sup></strong>',
+          explanation: 'Subtração: 4 &minus; 6 = &minus;2'
+        },
+        {
+          tag: 'P4: Potência de Produto',
+          exprHtml: '(3 &sdot; 7)<sup>2</sup>',
+          ansHtml: '(3 &sdot; 7)<sup>2</sup>&nbsp;=&nbsp;<strong>3<sup>2</sup> &sdot; 7<sup>2</sup></strong>',
+          explanation: 'Distribui o expoente 2 para ambos'
+        },
+        {
+          tag: 'P8: Expoente Fracionário',
+          exprHtml: '5<sup><span class="m-frac"><span class="m-num">2</span><span class="m-den">3</span></span></sup>',
+          ansHtml: '5<sup><span class="m-frac"><span class="m-num">2</span><span class="m-den">3</span></span></sup>&nbsp;=&nbsp;<span class="m-rad"><sup class="m-rad-deg">3</sup><span class="m-rad-sign">√</span><span class="m-rad-val">5<sup>2</sup></span></span>&nbsp;=&nbsp;<strong><span class="m-rad"><sup class="m-rad-deg">3</sup><span class="m-rad-sign">√</span><span class="m-rad-val">25</span></span></strong>',
+          explanation: 'Denominador 3 vira raiz cúbica de 5² = 25'
+        },
+        {
+          tag: 'P6: Expoente Negativo',
+          exprHtml: 'x<sup>&minus;5</sup>',
+          ansHtml: 'x<sup>&minus;5</sup>&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">1</span><span class="m-den">x<sup>5</sup></span></span></strong>',
+          explanation: 'Inverte a base com expoente positivo 5'
+        },
+        {
+          tag: 'P7: Inversão de Fração',
+          exprHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">5</span><span class="m-den">2</span></span><span class="m-paren">)</span><sup>&minus;4</sup>',
+          ansHtml: '<span class="m-paren">(</span><span class="m-frac"><span class="m-num">5</span><span class="m-den">2</span></span><span class="m-paren">)</span><sup>&minus;4</sup>&nbsp;=&nbsp;<span class="m-paren">(</span><span class="m-frac"><span class="m-num">2</span><span class="m-den">5</span></span><span class="m-paren">)</span><sup>4</sup>&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">16</span><span class="m-den">625</span></span></strong>',
+          explanation: 'Inverte a fração interna para 2/5 e eleva à quarta'
+        },
+        {
+          tag: 'P8: Expoente Meio (Raiz Quadrada)',
+          exprHtml: '3<sup><span class="m-frac"><span class="m-num">1</span><span class="m-den">2</span></span></sup>',
+          ansHtml: '3<sup><span class="m-frac"><span class="m-num">1</span><span class="m-den">2</span></span></sup>&nbsp;=&nbsp;<strong><span class="m-rad"><span class="m-rad-sign">√</span><span class="m-rad-val">3</span></span></strong>',
+          explanation: 'Expoente 1/2 equivale exatamente à raiz quadrada'
+        },
+        {
+          tag: 'P3: Potência com Negativo',
+          exprHtml: '(2<sup>&minus;2</sup>)<sup>3</sup>',
+          ansHtml: '(2<sup>&minus;2</sup>)<sup>3</sup>&nbsp;=&nbsp;2<sup>(&minus;2) &sdot; 3</sup>&nbsp;=&nbsp;<strong>2<sup>&minus;6</sup></strong>',
+          explanation: 'Multiplicação de expoentes: (&minus;2) &sdot; 3 = &minus;6'
+        }
+      ]
+    };
+
+    /* ========================================================
+       BANCO DE QUESTÕES DE LOGARITMOS
+       Formatadas para resolução nítida, horizontal, sem sobreposição
+       ======================================================== */
+    const LOG_PRESETS = {
+      p1: [ // Operatórias Clássicas (P1, P2 e P3)
+        {
+          tag: 'P1: Logaritmo do Produto',
+          exprHtml: '<span class="m-log">log</span><sub>a</sub> (x &sdot; y)',
+          ansHtml: '<span class="m-log">log</span><sub>a</sub> (x &sdot; y)&nbsp;=&nbsp;<strong><span class="m-log">log</span><sub>a</sub> x + <span class="m-log">log</span><sub>a</sub> y</strong>',
+          explanation: 'O logaritmo do produto vira a soma dos logaritmos'
+        },
+        {
+          tag: 'P1: Logaritmo do Produto Numérico',
+          exprHtml: '<span class="m-log">log</span><sub>2</sub> (4 &sdot; 8)',
+          ansHtml: '<span class="m-log">log</span><sub>2</sub> 4 + <span class="m-log">log</span><sub>2</sub> 8&nbsp;=&nbsp;2 + 3&nbsp;=&nbsp;<strong>5</strong>',
+          explanation: 'Soma dos logaritmos: log₂(4) = 2 e log₂(8) = 3 ➜ 2 + 3 = 5'
+        },
+        {
+          tag: 'P2: Logaritmo do Quociente',
+          exprHtml: '<span class="m-log">log</span><sub>a</sub> <span class="m-paren">(</span><span class="m-frac"><span class="m-num">x</span><span class="m-den">y</span></span><span class="m-paren">)</span>',
+          ansHtml: '<span class="m-log">log</span><sub>a</sub> <span class="m-paren">(</span><span class="m-frac"><span class="m-num">x</span><span class="m-den">y</span></span><span class="m-paren">)</span>&nbsp;=&nbsp;<strong><span class="m-log">log</span><sub>a</sub> x &minus; <span class="m-log">log</span><sub>a</sub> y</strong>',
+          explanation: 'O logaritmo da divisão vira a subtração dos logaritmos'
+        },
+        {
+          tag: 'P2: Logaritmo do Quociente Numérico',
+          exprHtml: '<span class="m-log">log</span><sub>3</sub> <span class="m-paren">(</span><span class="m-frac"><span class="m-num">81</span><span class="m-den">9</span></span><span class="m-paren">)</span>',
+          ansHtml: '<span class="m-log">log</span><sub>3</sub> 81 &minus; <span class="m-log">log</span><sub>3</sub> 9&nbsp;=&nbsp;4 &minus; 2&nbsp;=&nbsp;<strong>2</strong>',
+          explanation: 'Subtração: log₃(81) = 4 e log₃(9) = 2 ➜ 4 &minus; 2 = 2'
+        },
+        {
+          tag: 'P3: Logaritmo da Potência (Regra do Tombo)',
+          exprHtml: '<span class="m-log">log</span><sub>a</sub> (x<sup>n</sup>)',
+          ansHtml: '<span class="m-log">log</span><sub>a</sub> (x<sup>n</sup>)&nbsp;=&nbsp;<strong>n &sdot; <span class="m-log">log</span><sub>a</sub> x</strong>',
+          explanation: 'O expoente n "tomba" para frente multiplicando o logaritmo'
+        },
+        {
+          tag: 'P3: Regra do Tombo',
+          exprHtml: '<span class="m-log">log</span><sub>2</sub> (x<sup>5</sup>)',
+          ansHtml: '<span class="m-log">log</span><sub>2</sub> (x<sup>5</sup>)&nbsp;=&nbsp;<strong>5 &sdot; <span class="m-log">log</span><sub>2</sub> x</strong>',
+          explanation: 'O expoente 5 cai multiplicando à frente'
+        },
+        {
+          tag: 'P1: Logaritmo Decimal do Produto',
+          exprHtml: '<span class="m-log">log</span> (10 &sdot; x)',
+          ansHtml: '<span class="m-log">log</span> 10 + <span class="m-log">log</span> x&nbsp;=&nbsp;<strong>1 + <span class="m-log">log</span> x</strong>',
+          explanation: 'Na base 10: log(10) = 1, resultando em 1 + log x'
+        },
+        {
+          tag: 'P2: Logaritmo Decimal do Quociente',
+          exprHtml: '<span class="m-log">log</span> <span class="m-paren">(</span><span class="m-frac"><span class="m-num">100</span><span class="m-den">y</span></span><span class="m-paren">)</span>',
+          ansHtml: '<span class="m-log">log</span> 100 &minus; <span class="m-log">log</span> y&nbsp;=&nbsp;<strong>2 &minus; <span class="m-log">log</span> y</strong>',
+          explanation: 'Na base 10: log(100) = 2, resultando em 2 &minus; log y'
+        },
+        {
+          tag: 'P3: Potência com Mesma Base',
+          exprHtml: '<span class="m-log">log</span><sub>5</sub> (5<sup>3</sup>)',
+          ansHtml: '3 &sdot; <span class="m-log">log</span><sub>5</sub> 5&nbsp;=&nbsp;3 &sdot; 1&nbsp;=&nbsp;<strong>3</strong>',
+          explanation: 'Tomba o 3 e como log₅(5) = 1, o resultado final é 3'
+        },
+        {
+          tag: 'P3: Logaritmo de Raiz Quadrada',
+          exprHtml: '<span class="m-log">log</span><sub>2</sub> <span class="m-rad"><span class="m-rad-sign">√</span><span class="m-rad-val">x</span></span>',
+          ansHtml: '<span class="m-log">log</span><sub>2</sub> (x<sup><span class="m-frac"><span class="m-num">1</span><span class="m-den">2</span></span></sup>)&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">1</span><span class="m-den">2</span></span> <span class="m-log">log</span><sub>2</sub> x</strong>',
+          explanation: 'A raiz quadrada vira expoente fracionário 1/2, que tomba multiplicando'
+        }
+      ],
+      p2: [ // Mudança e Inversão de Base (P4 e P5)
+        {
+          tag: 'P4: Mudança de Base Geral',
+          exprHtml: '<span class="m-log">log</span><sub>a</sub> b',
+          ansHtml: '<span class="m-log">log</span><sub>a</sub> b&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num"><span class="m-log">log</span><sub>c</sub> b</span><span class="m-den"><span class="m-log">log</span><sub>c</sub> a</span></span></strong>',
+          explanation: 'Mudança para base c: log do logaritmando sobre log da base original'
+        },
+        {
+          tag: 'P4: Mudança para Base 10',
+          exprHtml: '<span class="m-log">log</span><sub>2</sub> 5',
+          ansHtml: '<span class="m-log">log</span><sub>2</sub> 5&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num"><span class="m-log">log</span> 5</span><span class="m-den"><span class="m-log">log</span> 2</span></span></strong>',
+          explanation: 'Passa para a base decimal 10 para cálculo na calculadora'
+        },
+        {
+          tag: 'P5: Inversão de Base',
+          exprHtml: '<span class="m-log">log</span><sub>a</sub> b',
+          ansHtml: '<span class="m-log">log</span><sub>a</sub> b&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">1</span><span class="m-den"><span class="m-log">log</span><sub>b</sub> a</span></span></strong>',
+          explanation: 'Ao inverter a fração (1 sobre...), a base e o logaritmando trocam de lugar'
+        },
+        {
+          tag: 'P5: Inversão Numérica',
+          exprHtml: '<span class="m-log">log</span><sub>2</sub> 3',
+          ansHtml: '<span class="m-log">log</span><sub>2</sub> 3&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">1</span><span class="m-den"><span class="m-log">log</span><sub>3</sub> 2</span></span></strong>',
+          explanation: 'Inverte o 2 e o 3 de posição ficando 1 sobre log₃(2)'
+        },
+        {
+          tag: 'P4: Redução a Logaritmo Único',
+          exprHtml: '<span class="m-frac"><span class="m-num"><span class="m-log">log</span><sub>3</sub> 8</span><span class="m-den"><span class="m-log">log</span><sub>3</sub> 2</span></span>',
+          ansHtml: '<span class="m-log">log</span><sub>2</sub> 8&nbsp;=&nbsp;<strong>3</strong>',
+          explanation: 'Reduz a logaritmo de base 2: log₂(8) = 3'
+        },
+        {
+          tag: 'P4: Mudança para Base 2',
+          exprHtml: '<span class="m-log">log</span><sub>5</sub> x',
+          ansHtml: '<span class="m-log">log</span><sub>5</sub> x&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num"><span class="m-log">log</span><sub>2</sub> x</span><span class="m-den"><span class="m-log">log</span><sub>2</sub> 5</span></span></strong>',
+          explanation: 'Passa ambos para a nova base 2'
+        },
+        {
+          tag: 'P5: Inversão com Base 10',
+          exprHtml: '<span class="m-log">log</span><sub>7</sub> 10',
+          ansHtml: '<span class="m-log">log</span><sub>7</sub> 10&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">1</span><span class="m-den"><span class="m-log">log</span> 7</span></span></strong>',
+          explanation: 'Inverte e a base vira 10 (logaritmo decimal)'
+        },
+        {
+          tag: 'P4: Redução a Base 5',
+          exprHtml: '<span class="m-frac"><span class="m-num"><span class="m-log">log</span> 25</span><span class="m-den"><span class="m-log">log</span> 5</span></span>',
+          ansHtml: '<span class="m-log">log</span><sub>5</sub> 25&nbsp;=&nbsp;<strong>2</strong>',
+          explanation: 'Reduz à base 5: log₅(25) = 2 porque 5² = 25'
+        },
+        {
+          tag: 'P4: Mudança de Base e Simplificação',
+          exprHtml: '<span class="m-log">log</span><sub>4</sub> 9',
+          ansHtml: '<span class="m-frac"><span class="m-num"><span class="m-log">log</span><sub>2</sub> 9</span><span class="m-den"><span class="m-log">log</span><sub>2</sub> 4</span></span>&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num"><span class="m-log">log</span><sub>2</sub> 9</span><span class="m-den">2</span></span></strong>',
+          explanation: 'Como log₂(4) = 2, o denominador simplifica para 2'
+        },
+        {
+          tag: 'P5: Produto de Logaritmos Inversos',
+          exprHtml: '<span class="m-log">log</span><sub>3</sub> 5 &sdot; <span class="m-log">log</span><sub>5</sub> 3',
+          ansHtml: '<span class="m-log">log</span><sub>3</sub> 5 &sdot; <span class="m-frac"><span class="m-num">1</span><span class="m-den"><span class="m-log">log</span><sub>3</sub> 5</span></span>&nbsp;=&nbsp;<strong>1</strong>',
+          explanation: 'Logaritmos com termos invertidos são recíprocos multiplicativos: produto = 1'
+        }
+      ],
+      p3: [ // Desafio Geral (Mix com simplificações)
+        {
+          tag: 'Produto + Tombo',
+          exprHtml: '<span class="m-log">log</span><sub>2</sub> (8 &sdot; x<sup>3</sup>)',
+          ansHtml: '<span class="m-log">log</span><sub>2</sub> 8 + 3<span class="m-log">log</span><sub>2</sub> x&nbsp;=&nbsp;<strong>3 + 3<span class="m-log">log</span><sub>2</sub> x</strong>',
+          explanation: 'Separa o produto na soma e tomba o expoente 3: log₂(8) = 3'
+        },
+        {
+          tag: 'Quociente + Tombo',
+          exprHtml: '<span class="m-log">log</span><sub>3</sub> <span class="m-paren">(</span><span class="m-frac"><span class="m-num">9</span><span class="m-den">x<sup>2</sup></span></span><span class="m-paren">)</span>',
+          ansHtml: '<span class="m-log">log</span><sub>3</sub> 9 &minus; 2<span class="m-log">log</span><sub>3</sub> x&nbsp;=&nbsp;<strong>2 &minus; 2<span class="m-log">log</span><sub>3</sub> x</strong>',
+          explanation: 'Separa a fração na subtração e tomba o expoente 2: log₃(9) = 2'
+        },
+        {
+          tag: 'Produto e Quociente Compostos',
+          exprHtml: '<span class="m-log">log</span><sub>2</sub> <span class="m-paren">(</span><span class="m-frac"><span class="m-num">x &sdot; y</span><span class="m-den">z</span></span><span class="m-paren">)</span>',
+          ansHtml: '<strong><span class="m-log">log</span><sub>2</sub> x + <span class="m-log">log</span><sub>2</sub> y &minus; <span class="m-log">log</span><sub>2</sub> z</strong>',
+          explanation: 'Os fatores do numerador somam e o denominador subtrai'
+        },
+        {
+          tag: 'Raiz Cúbica',
+          exprHtml: '<span class="m-log">log</span><sub>5</sub> <span class="m-rad"><sup class="m-rad-deg">3</sup><span class="m-rad-sign">√</span><span class="m-rad-val">x</span></span>',
+          ansHtml: '<span class="m-log">log</span><sub>5</sub> (x<sup><span class="m-frac"><span class="m-num">1</span><span class="m-den">3</span></span></sup>)&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">1</span><span class="m-den">3</span></span> <span class="m-log">log</span><sub>5</sub> x</strong>',
+          explanation: 'O índice 3 do radical tomba como fração 1/3 multiplicando'
+        },
+        {
+          tag: 'Mudança de Base para 10',
+          exprHtml: '<span class="m-log">log</span><sub>2</sub> 7',
+          ansHtml: '<span class="m-log">log</span><sub>2</sub> 7&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num"><span class="m-log">log</span> 7</span><span class="m-den"><span class="m-log">log</span> 2</span></span></strong>',
+          explanation: 'Fórmula da mudança de base log_a(b) = log(b) / log(a)'
+        },
+        {
+          tag: 'Inversão com Variável',
+          exprHtml: '<span class="m-log">log</span><sub>4</sub> x',
+          ansHtml: '<span class="m-log">log</span><sub>4</sub> x&nbsp;=&nbsp;<strong><span class="m-frac"><span class="m-num">1</span><span class="m-den"><span class="m-log">log</span><sub>x</sub> 4</span></span></strong>',
+          explanation: 'Inverte a fração e a base 4 vira o logaritmando'
+        },
+        {
+          tag: 'Produto com Duas Potências',
+          exprHtml: '<span class="m-log">log</span> (x<sup>2</sup> &sdot; y<sup>3</sup>)',
+          ansHtml: '<span class="m-log">log</span> (x<sup>2</sup> &sdot; y<sup>3</sup>)&nbsp;=&nbsp;<strong>2<span class="m-log">log</span> x + 3<span class="m-log">log</span> y</strong>',
+          explanation: 'Separa o produto na soma e tomba os respectivos expoentes 2 e 3'
+        },
+        {
+          tag: 'Quociente com Raiz e Potência',
+          exprHtml: '<span class="m-log">log</span> <span class="m-paren">(</span><span class="m-frac"><span class="m-num"><span class="m-rad"><span class="m-rad-sign">√</span><span class="m-rad-val">x</span></span></span><span class="m-den">y<sup>2</sup></span></span><span class="m-paren">)</span>',
+          ansHtml: '<strong><span class="m-frac"><span class="m-num">1</span><span class="m-den">2</span></span><span class="m-log">log</span> x &minus; 2<span class="m-log">log</span> y</strong>',
+          explanation: 'O expoente 1/2 tomba positivo e o expoente 2 do denominador tomba subtraindo'
+        },
+        {
+          tag: 'Base 3 com Potência de 3',
+          exprHtml: '<span class="m-log">log</span><sub>3</sub> (27 &sdot; x<sup>4</sup>)',
+          ansHtml: '<span class="m-log">log</span><sub>3</sub> 27 + 4<span class="m-log">log</span><sub>3</sub> x&nbsp;=&nbsp;<strong>3 + 4<span class="m-log">log</span><sub>3</sub> x</strong>',
+          explanation: 'Como 3³ = 27, temos log₃(27) = 3 somado a 4 &sdot; log₃(x)'
+        },
+        {
+          tag: 'Simplificação de Base 4',
+          exprHtml: '<span class="m-frac"><span class="m-num"><span class="m-log">log</span><sub>5</sub> 64</span><span class="m-den"><span class="m-log">log</span><sub>5</sub> 4</span></span>',
+          ansHtml: '<span class="m-log">log</span><sub>4</sub> 64&nbsp;=&nbsp;<strong>3</strong>',
+          explanation: 'Muda de volta para base 4: log₄(64) = 3 porque 4³ = 64'
+        }
+      ]
+    };
+
+    /* ========================================================
+       CONTEÚDO DO QUADRO DE GIZ: PROPRIEDADES CONDENSADAS
+       (Exponencial P1-P8 e Logaritmos P1-P5 para o Quadro Escolar)
+       ======================================================== */
+    const CHALK_DATA = {
+      exp: [
+        {
+          badge: 'P1',
+          name: 'Produto de Mesma Base',
+          rule: 'Conserva a base e SOMA',
+          formulaHtml: 'a<sup>m</sup> &sdot; a<sup>n</sup> = a<sup>m + n</sup>',
+          exampleHtml: '2<sup>3</sup> &sdot; 2<sup>2</sup> = 2<sup>3+2</sup> = <strong>2<sup>5</sup></strong>',
+          caution: 'Não vale na adição: 2³ + 2² &ne; 2⁵'
+        },
+        {
+          badge: 'P2',
+          name: 'Divisão de Mesma Base',
+          rule: 'Conserva a base e SUBTRAI',
+          formulaHtml: '<span class="m-frac"><span class="m-num">a<sup>m</sup></span><span class="m-den">a<sup>n</sup></span></span> = a<sup>m &minus; n</sup>',
+          exampleHtml: '<span class="m-frac"><span class="m-num">3<sup>5</sup></span><span class="m-den">3<sup>2</sup></span></span> = 3<sup>5&minus;2</sup> = <strong>3<sup>3</sup></strong>',
+          caution: 'Ordem fixa: expoente de cima menos o de baixo'
+        },
+        {
+          badge: 'P3',
+          name: 'Potência de Potência',
+          rule: 'Conserva a base e MULTIPLICA',
+          formulaHtml: '(a<sup>m</sup>)<sup>n</sup> = a<sup>m &sdot; n</sup>',
+          exampleHtml: '(2<sup>3</sup>)<sup>2</sup> = 2<sup>3 &sdot; 2</sup> = <strong>2<sup>6</sup></strong>',
+          caution: 'Com parênteses multiplica: (2³)² = 2⁶; sem parênteses 2³² = 2⁹'
+        },
+        {
+          badge: 'P4',
+          name: 'Potência de um Produto',
+          rule: 'Expoente vai para cada fator',
+          formulaHtml: '(a &sdot; b)<sup>n</sup> = a<sup>n</sup> &sdot; b<sup>n</sup>',
+          exampleHtml: '(2 &sdot; 5)<sup>3</sup> = 2<sup>3</sup> &sdot; 5<sup>3</sup> = <strong>8 &sdot; 125</strong>',
+          caution: 'Não distribui na soma: (a + b)² &ne; a² + b²'
+        },
+        {
+          badge: 'P5',
+          name: 'Potência de Fração',
+          rule: 'Expoente vai em cima e embaixo',
+          formulaHtml: '(<span class="m-frac"><span class="m-num">a</span><span class="m-den">b</span></span>)<sup>n</sup> = <span class="m-frac"><span class="m-num">a<sup>n</sup></span><span class="m-den">b<sup>n</sup></span></span>',
+          exampleHtml: '(<span class="m-frac"><span class="m-num">2</span><span class="m-den">3</span></span>)<sup>3</sup> = <span class="m-frac"><span class="m-num">2<sup>3</sup></span><span class="m-den">3<sup>3</sup></span></span> = <strong><span class="m-frac"><span class="m-num">8</span><span class="m-den">27</span></span></strong>',
+          caution: 'Denominador diferente de zero (b &ne; 0)'
+        },
+        {
+          badge: 'P6',
+          name: 'Expoente Negativo',
+          rule: 'Inverte a base e fica positivo',
+          formulaHtml: 'a<sup>&minus;n</sup> = <span class="m-frac"><span class="m-num">1</span><span class="m-den">a<sup>n</sup></span></span>',
+          exampleHtml: '2<sup>&minus;3</sup> = <span class="m-frac"><span class="m-num">1</span><span class="m-den">2<sup>3</sup></span></span> = <strong><span class="m-frac"><span class="m-num">1</span><span class="m-den">8</span></span></strong>',
+          caution: 'O número NÃO vira negativo, apenas inverte de posição'
+        },
+        {
+          badge: 'P7',
+          name: 'Fração com Expoente Negativo',
+          rule: 'Inverte a fração de cabeça para baixo',
+          formulaHtml: '(<span class="m-frac"><span class="m-num">a</span><span class="m-den">b</span></span>)<sup>&minus;n</sup> = (<span class="m-frac"><span class="m-num">b</span><span class="m-den">a</span></span>)<sup>n</sup>',
+          exampleHtml: '(<span class="m-frac"><span class="m-num">2</span><span class="m-den">3</span></span>)<sup>&minus;2</sup> = (<span class="m-frac"><span class="m-num">3</span><span class="m-den">2</span></span>)<sup>2</sup> = <strong><span class="m-frac"><span class="m-num">9</span><span class="m-den">4</span></span></strong>',
+          caution: 'Inverte numerador com denominador e o expoente fica positivo'
+        },
+        {
+          badge: 'P8',
+          name: 'Expoente Fracionário (Radiciação)',
+          rule: 'Quem tá no sol vai pra sombra',
+          formulaHtml: 'a<sup><span class="m-frac"><span class="m-num">m</span><span class="m-den">n</span></span></sup> = <span class="m-rad"><sup class="m-rad-deg">n</sup><span class="m-rad-sign">√</span><span class="m-rad-val">a<sup>m</sup></span></span>',
+          exampleHtml: '8<sup><span class="m-frac"><span class="m-num">2</span><span class="m-den">3</span></span></sup> = <span class="m-rad"><sup class="m-rad-deg">3</sup><span class="m-rad-sign">√</span><span class="m-rad-val">8<sup>2</sup></span></span> = <span class="m-rad"><sup class="m-rad-deg">3</sup><span class="m-rad-sign">√</span><span class="m-rad-val">64</span></span> = <strong>4</strong>',
+          caution: 'O número de baixo da fração (n) vira o índice da raiz'
+        }
+      ],
+      log: [
+        {
+          badge: 'P1',
+          name: 'Logaritmo do Produto',
+          rule: 'Multiplicação vira SOMA',
+          formulaHtml: '<span class="m-log">log</span><sub>a</sub> (x &sdot; y) = <span class="m-log">log</span><sub>a</sub> x + <span class="m-log">log</span><sub>a</sub> y',
+          exampleHtml: '<span class="m-log">log</span><sub>2</sub> (4 &sdot; 8) = <span class="m-log">log</span><sub>2</sub> 4 + <span class="m-log">log</span><sub>2</sub> 8 = 2 + 3 = <strong>5</strong>',
+          caution: 'Não existe propriedade para soma dentro: log(x+y) &ne; log x + log y'
+        },
+        {
+          badge: 'P2',
+          name: 'Logaritmo do Quociente',
+          rule: 'Divisão vira SUBTRAÇÃO',
+          formulaHtml: '<span class="m-log">log</span><sub>a</sub> (<span class="m-frac"><span class="m-num">x</span><span class="m-den">y</span></span>) = <span class="m-log">log</span><sub>a</sub> x &minus; <span class="m-log">log</span><sub>a</sub> y',
+          exampleHtml: '<span class="m-log">log</span><sub>3</sub> (<span class="m-frac"><span class="m-num">81</span><span class="m-den">9</span></span>) = <span class="m-log">log</span><sub>3</sub> 81 &minus; <span class="m-log">log</span><sub>3</sub> 9 = 4 &minus; 2 = <strong>2</strong>',
+          caution: 'Sempre o de cima menos o de baixo: log(x/y) &ne; log x / log y'
+        },
+        {
+          badge: 'P3',
+          name: 'Regra do Tombo (Potência)',
+          rule: 'Expoente CAI multiplicando na frente',
+          formulaHtml: '<span class="m-log">log</span><sub>a</sub> (x<sup>n</sup>) = n &sdot; <span class="m-log">log</span><sub>a</sub> x',
+          exampleHtml: '<span class="m-log">log</span><sub>2</sub> (8<sup>5</sup>) = 5 &sdot; <span class="m-log">log</span><sub>2</sub> 8 = 5 &sdot; 3 = <strong>15</strong>',
+          caution: 'O expoente deve estar no logaritmando, não no logaritmo todo'
+        },
+        {
+          badge: 'P4',
+          name: 'Mudança de Base',
+          rule: 'Cria fração com nova base escolhida',
+          formulaHtml: '<span class="m-log">log</span><sub>a</sub> b = <span class="m-frac"><span class="m-num"><span class="m-log">log</span><sub>c</sub> b</span><span class="m-den"><span class="m-log">log</span><sub>c</sub> a</span></span>',
+          exampleHtml: '<span class="m-log">log</span><sub>4</sub> 64 = <span class="m-frac"><span class="m-num"><span class="m-log">log</span><sub>2</sub> 64</span><span class="m-den"><span class="m-log">log</span><sub>2</sub> 4</span></span> = <span class="m-frac"><span class="m-num">6</span><span class="m-den">2</span></span> = <strong>3</strong>',
+          caution: 'Logaritmando antigo (b) em cima; base antiga (a) embaixo'
+        },
+        {
+          badge: 'P5',
+          name: 'Inversão de Base',
+          rule: 'Inverte fração e troca base com logaritmando',
+          formulaHtml: '<span class="m-log">log</span><sub>a</sub> b = <span class="m-frac"><span class="m-num">1</span><span class="m-den"><span class="m-log">log</span><sub>b</sub> a</span></span>',
+          exampleHtml: '<span class="m-log">log</span><sub>8</sub> 2 = <span class="m-frac"><span class="m-num">1</span><span class="m-den"><span class="m-log">log</span><sub>2</sub> 8</span></span> = <span class="m-frac"><span class="m-num">1</span><span class="m-den">3</span></span>',
+          caution: 'Consequência direta: logₐ b &sdot; log_b a = 1'
+        }
+      ]
+    };
+
+    /* ========================================================
+       ESTADO GERAL DO JOGO INTEGRADO
+       ======================================================== */
+    const state = {
+      subject: 'exp', // 'exp' (Exponencial), 'log' (Logaritmos) ou 'mixed' (Misto)
+      currentPresetNum: 1,
+      totalQuestions: 10,
+      targetScore: 10,
+      activeDeck: [],
+      currentIndex: 0,
+      isRevealed: false,
+      isAnimatingFeedback: false,
+      isGameOver: false,
+      currentTurn: 'A', // 'A' (Time Azul) ou 'B' (Time Rosa)
+      soundEnabled: true,
+      teamA: { name: 'MENINOS', score: 0 },
+      teamB: { name: 'MENINAS', score: 0 },
+      // Estado do Quadro de Giz Escolar (Sessão de Aprendizado Condensada)
+      chalkSubject: 'exp',
+      chalkVisibleCount: 1
+    };
+
+    /* ========================================================
+       ÁUDIO SINTETIZADO (Web Audio API)
+       ======================================================== */
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioClass) audioCtx = new AudioClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!state.soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        if (type === 'tick') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(460, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } else if (type === 'reveal') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.18);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.23);
+        } else if (type === 'correct') {
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            const t = now + (idx * 0.07);
+            gain.gain.setValueAtTime(0.25, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.18);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.2);
+          });
+        } else if (type === 'wrong') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(130, now + 0.25);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.26);
+        } else if (type === 'victory') {
+          [523.25, 659.25, 783.99, 1046.50, 1046.50].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            const t = now + (idx * 0.12);
+            gain.gain.setValueAtTime(0.3, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.32);
+          });
+        }
+      } catch (e) {
+        console.warn('Audio failed', e);
+      }
+    }
+
+    /* ========================================================
+       CONTROLE DE MATÉRIA / TEMA (Exponencial, Logaritmo ou Misto)
+       ======================================================== */
+    function setSubject(subj) {
+      state.subject = subj;
+      document.querySelectorAll('.btn-subject-tab').forEach(b => b.classList.remove('active'));
+
+      if (subj === 'exp') {
+        document.getElementById('tabExp').classList.add('active');
+        document.getElementById('btnPreset1').textContent = '⭐ Jogo 1: Básicas (P1-P3)';
+        document.getElementById('btnPreset2').textContent = '⚡ Jogo 2: Inversões (P4-P7)';
+        document.getElementById('btnPreset3').textContent = '🔥 Jogo 3: Geral (P1-P8)';
+      } else if (subj === 'log') {
+        document.getElementById('tabLog').classList.add('active');
+        document.getElementById('btnPreset1').textContent = '⭐ Jogo 1: Operatórias (P1-P3)';
+        document.getElementById('btnPreset2').textContent = '⚡ Jogo 2: Mudança de Base';
+        document.getElementById('btnPreset3').textContent = '🔥 Jogo 3: Desafio Geral';
+      } else {
+        document.getElementById('tabMixed').classList.add('active');
+        document.getElementById('btnPreset1').textContent = '⭐ Misto Básico';
+        document.getElementById('btnPreset2').textContent = '⚡ Misto Intermediário';
+        document.getElementById('btnPreset3').textContent = '🔥 Misto Avançado';
+      }
+
+      loadGamePreset(state.currentPresetNum);
+    }
+
+    function loadGamePreset(presetNum) {
+      state.currentPresetNum = presetNum;
+
+      document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`btnPreset${presetNum}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      let source = [];
+      const key = `p${presetNum}`;
+
+      if (state.subject === 'exp') {
+        source = [...EXP_PRESETS[key]];
+      } else if (state.subject === 'log') {
+        source = [...LOG_PRESETS[key]];
+      } else {
+        // Misto: intercala 5 questões de Exponencial e 5 de Logaritmos
+        const expList = EXP_PRESETS[key];
+        const logList = LOG_PRESETS[key];
+        source = [];
+        for (let i = 0; i < 5; i++) {
+          if (expList[i]) source.push(expList[i]);
+          if (logList[i]) source.push(logList[i]);
+        }
+      }
+
+      state.activeDeck = [...source];
+      state.totalQuestions = state.activeDeck.length;
+      state.targetScore = state.totalQuestions;
+
+      resetMatch(false);
+    }
+
+    /* ========================================================
+       RENDERIZAÇÃO DAS TORRES E INTERFACE
+       ======================================================== */
+    function renderTowers() {
+      document.getElementById('teamAGoalDisplay').textContent = state.targetScore;
+      document.getElementById('teamBGoalDisplay').textContent = state.targetScore;
+      document.querySelectorAll('.goal-text').forEach(el => el.textContent = state.targetScore);
+
+      document.getElementById('teamANameDisplay').textContent = state.teamA.name;
+      document.getElementById('teamBNameDisplay').textContent = state.teamB.name;
+
+      document.getElementById('teamAScore').textContent = state.teamA.score;
+      document.getElementById('teamBScore').textContent = state.teamB.score;
+
+      const pctA = Math.min(100, (state.teamA.score / state.targetScore) * 100);
+      const pctB = Math.min(100, (state.teamB.score / state.targetScore) * 100);
+
+      document.getElementById('teamAFill').style.height = `${pctA}%`;
+      document.getElementById('teamBFill').style.height = `${pctB}%`;
+
+      renderSteps('teamASteps', state.targetScore, state.teamA.score);
+      renderSteps('teamBSteps', state.targetScore, state.teamB.score);
+
+      const colA = document.getElementById('teamAColumn');
+      const colB = document.getElementById('teamBColumn');
+      const centerBadge = document.getElementById('turnBadgeCenter');
+      const centerText = document.getElementById('turnBadgeText');
+
+      if (state.currentTurn === 'A') {
+        colA.classList.add('active-turn');
+        colB.classList.remove('active-turn');
+        centerBadge.className = 'turn-badge-center team-a';
+        centerText.textContent = `VEZ: ${state.teamA.name}`;
+      } else {
+        colA.classList.remove('active-turn');
+        colB.classList.add('active-turn');
+        centerBadge.className = 'turn-badge-center team-b';
+        centerText.textContent = `VEZ: ${state.teamB.name}`;
+      }
+    }
+
+    function renderSteps(containerId, target, current) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      for (let i = 1; i <= target; i++) {
+        const node = document.createElement('div');
+        node.className = `tower-step-node ${i <= current ? 'reached' : ''}`;
+        node.textContent = i;
+        container.appendChild(node);
+      }
+    }
+
+    function updateQuestionDisplay() {
+      const pastQ = state.currentIndex > 0 ? state.activeDeck[state.currentIndex - 1] : null;
+      const currQ = state.activeDeck[state.currentIndex];
+      const nextQ = state.currentIndex + 1 < state.activeDeck.length ? state.activeDeck[state.currentIndex + 1] : null;
+
+      // Passada
+      document.getElementById('pastMath').innerHTML = pastQ ? pastQ.exprHtml : '<span style="color:#cbd5e1">—</span>';
+      
+      // Atual (Antes de revelar, mostra a expressão original pura)
+      if (currQ) {
+        document.getElementById('currentMathDisplay').innerHTML = currQ.exprHtml;
+        document.getElementById('ruleTag').textContent = `⚡ ${currQ.tag}`;
+        document.getElementById('ruleDesc').textContent = currQ.explanation;
+      }
+
+      // Futura
+      document.getElementById('futureMath').innerHTML = nextQ ? nextQ.exprHtml : '<span style="color:#cbd5e1">Fim</span>';
+
+      // Badges
+      const questionNum = state.currentIndex + 1;
+      document.getElementById('currentSlotBadge').textContent = `CÓDIGO #${questionNum}`;
+      document.getElementById('questionCounterBadge').innerHTML = `Pergunta: <strong>${questionNum} / ${state.totalQuestions}</strong>`;
+
+      // Limpa animações anteriores
+      const slot = document.getElementById('slotCurrent');
+      slot.classList.remove('revealed', 'anim-correct', 'anim-wrong');
+      document.getElementById('ruleBox').classList.remove('active');
+      document.getElementById('feedbackBanner').className = 'feedback-banner';
+      state.isRevealed = false;
+      state.isAnimatingFeedback = false;
+
+      // Restaura para SOMENTE 1 BOTÃO (Revelar)
+      document.getElementById('btnRevealSingle').style.display = 'flex';
+      document.getElementById('evalButtonsGroup').classList.remove('active');
+      document.getElementById('shortcutHintDynamic').innerHTML = '<span class="kbd-badge">Espaço / Enter</span> Revelar Resultado';
+    }
+
+    /* ========================================================
+       REVELAR RESULTADO (Transição harmoniosa da conta)
+       ======================================================== */
+    function revealAnswer() {
+      if (state.isAnimatingFeedback) return;
+      const slot = document.getElementById('slotCurrent');
+      const ruleBox = document.getElementById('ruleBox');
+      const btnReveal = document.getElementById('btnRevealSingle');
+      const evalGroup = document.getElementById('evalButtonsGroup');
+      const currQ = state.activeDeck[state.currentIndex];
+
+      if (!state.isRevealed) {
+        slot.classList.add('revealed');
+        ruleBox.classList.add('active');
+        state.isRevealed = true;
+        playSound('reveal');
+
+        // Mostra a resolução harmoniosa no centro
+        if (currQ) {
+          document.getElementById('currentMathDisplay').innerHTML = currQ.ansHtml;
+        }
+
+        // Transição: esconde Revelar e exibe Acertou / Errou
+        btnReveal.style.display = 'none';
+        evalGroup.classList.add('active');
+        document.getElementById('shortcutHintDynamic').innerHTML = '<span class="kbd-badge">→ / Enter</span> Acertou • <span class="kbd-badge">←</span> Errou';
+      }
+    }
+
+    /* ========================================================
+       RESPOSTA: ACERTOU OU ERROU
+       ======================================================== */
+    function handleAnswer(isCorrect) {
+      if (state.isGameOver || state.isAnimatingFeedback) return;
+      state.isAnimatingFeedback = true;
+
+      const slot = document.getElementById('slotCurrent');
+      const feedbackBanner = document.getElementById('feedbackBanner');
+
+      if (isCorrect) {
+        playSound('correct');
+        slot.classList.add('anim-correct');
+        feedbackBanner.className = 'feedback-banner correct';
+        feedbackBanner.textContent = '🎉 ACERTOU! +1 PONTO';
+
+        if (state.currentTurn === 'A') state.teamA.score++;
+        else state.teamB.score++;
+      } else {
+        playSound('wrong');
+        slot.classList.add('anim-wrong');
+        feedbackBanner.className = 'feedback-banner wrong';
+        feedbackBanner.textContent = '❌ PASSOU A VEZ!';
+      }
+
+      renderTowers();
+
+      setTimeout(() => {
+        if (checkEndGame()) return;
+
+        state.currentTurn = state.currentTurn === 'A' ? 'B' : 'A';
+        renderTowers();
+        animateTumblerRoll();
+      }, 1100);
+    }
+
+    /* Giro mecânico do tambor de baixo para cima */
+    function animateTumblerRoll() {
+      const track = document.getElementById('tumblerTrack');
+      track.style.transition = 'transform 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.2)';
+      track.style.transform = 'translateY(calc(-50% - 130px))';
+      playSound('tick');
+
+      setTimeout(() => {
+        state.currentIndex++;
+        updateQuestionDisplay();
+
+        track.style.transition = 'none';
+        track.style.transform = 'translateY(-50%)';
+        void track.offsetHeight;
+      }, 380);
+    }
+
+    /* Checagem de Fim de Jogo */
+    function checkEndGame() {
+      const isLastQuestion = state.currentIndex + 1 >= state.totalQuestions;
+      const reachedGoal = state.teamA.score >= state.targetScore || state.teamB.score >= state.targetScore;
+
+      if (isLastQuestion || reachedGoal) {
+        state.isGameOver = true;
+        let winnerText = '';
+        let winnerColor = 'var(--team-a-primary)';
+
+        if (state.teamA.score > state.teamB.score) {
+          winnerText = `${state.teamA.name} VENCERAM!`;
+          winnerColor = 'var(--team-a-primary)';
+        } else if (state.teamB.score > state.teamA.score) {
+          winnerText = `${state.teamB.name} VENCERAM!`;
+          winnerColor = 'var(--team-b-primary)';
+        } else {
+          winnerText = `EMPATE ÉPICO!`;
+          winnerColor = '#f59e0b';
+        }
+
+        const banner = document.getElementById('victoryWinnerBanner');
+        banner.textContent = winnerText;
+        banner.style.background = winnerColor;
+
+        document.getElementById('victoryStats').textContent = 
+          `Placar Final: ${state.teamA.name} ${state.teamA.score} x ${state.teamB.score} ${state.teamB.name}. Foram respondidas ${state.currentIndex + 1} questões!`;
+
+        playSound('victory');
+        startConfetti();
+        document.getElementById('victoryModal').classList.add('open');
+        return true;
+      }
+      return false;
+    }
+
+    function switchTurn() {
+      state.currentTurn = state.currentTurn === 'A' ? 'B' : 'A';
+      renderTowers();
+      playSound('tick');
+    }
+
+    function adjustScore(team, delta) {
+      if (team === 'A') state.teamA.score = Math.max(0, state.teamA.score + delta);
+      else state.teamB.score = Math.max(0, state.teamB.score + delta);
+      renderTowers();
+    }
+
+    function resetMatch(fullReset = false) {
+      state.currentIndex = 0;
+      state.teamA.score = 0;
+      state.teamB.score = 0;
+      state.currentTurn = 'A';
+      state.isGameOver = false;
+      state.isAnimatingFeedback = false;
+
+      renderTowers();
+      updateQuestionDisplay();
+      stopConfetti();
+    }
+
+    function changeBgColor(hexColor) {
+      document.documentElement.style.setProperty('--bg-page', hexColor);
+      document.body.style.backgroundColor = hexColor;
+    }
+
+    /* ========================================================
+       MODAIS E TELAS FLUTUANTES
+       ======================================================== */
+    function toggleMuralModal() {
+      const modal = document.getElementById('muralModal');
+      const body = document.getElementById('muralBody');
+      const title = document.getElementById('muralTitle');
+
+      if (!modal.classList.contains('open')) {
+        if (state.subject === 'log') {
+          title.textContent = '📋 Mural das Propriedades dos Logaritmos';
+          body.innerHTML = `
+            <div class="prop-reference-grid">
+              <div class="prop-card"><span class="prop-card-tag tag-p1">P1</span><span class="prop-card-math"><span class="m-log">log</span><sub>a</sub> (x &sdot; y) = <span class="m-log">log</span><sub>a</sub> x + <span class="m-log">log</span><sub>a</sub> y</span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p2">P2</span><span class="prop-card-math"><span class="m-log">log</span><sub>a</sub> <span class="m-frac"><span class="m-num">x</span><span class="m-den">y</span></span> = <span class="m-log">log</span><sub>a</sub> x &minus; <span class="m-log">log</span><sub>a</sub> y</span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p3">P3</span><span class="prop-card-math"><span class="m-log">log</span><sub>a</sub> (x<sup>n</sup>) = n &sdot; <span class="m-log">log</span><sub>a</sub> x</span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p4">P4</span><span class="prop-card-math"><span class="m-log">log</span><sub>a</sub> b = <span class="m-frac"><span class="m-num"><span class="m-log">log</span><sub>c</sub> b</span><span class="m-den"><span class="m-log">log</span><sub>c</sub> a</span></span></span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p5">P5</span><span class="prop-card-math"><span class="m-log">log</span><sub>a</sub> b = <span class="m-frac"><span class="m-num">1</span><span class="m-den"><span class="m-log">log</span><sub>b</sub> a</span></span></span></div>
+            </div>
+            <div style="text-align:center; padding:10px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+              <img src="propriedades_log.png" alt="Propriedades dos Logaritmos" style="max-width:100%; height:auto; max-height:360px; object-fit:contain; border-radius:8px;">
+            </div>
+          `;
+        } else {
+          title.textContent = '📋 Mural das Propriedades da Função Exponencial';
+          body.innerHTML = `
+            <div class="prop-reference-grid">
+              <div class="prop-card"><span class="prop-card-tag tag-p1">P1</span><span class="prop-card-math">aᵐ &sdot; aⁿ = aᵐ⁺ⁿ</span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p2">P2</span><span class="prop-card-math"><span class="m-frac"><span class="m-num">aᵐ</span><span class="m-den">aⁿ</span></span> = aᵐ⁻ⁿ</span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p3">P3</span><span class="prop-card-math">(aᵐ)ⁿ = aᵐ&sdot;ⁿ</span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p4">P4</span><span class="prop-card-math">(a &sdot; b)ⁿ = aⁿ &sdot; bⁿ</span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p5">P5</span><span class="prop-card-math"><span class="m-paren">(</span><span class="m-frac"><span class="m-num">a</span><span class="m-den">b</span></span><span class="m-paren">)</span>ⁿ = <span class="m-frac"><span class="m-num">aⁿ</span><span class="m-den">bⁿ</span></span></span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p6">P6</span><span class="prop-card-math">a⁻ⁿ = <span class="m-frac"><span class="m-num">1</span><span class="m-den">aⁿ</span></span></span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p7">P7</span><span class="prop-card-math"><span class="m-paren">(</span><span class="m-frac"><span class="m-num">a</span><span class="m-den">b</span></span><span class="m-paren">)</span>⁻ⁿ = <span class="m-paren">(</span><span class="m-frac"><span class="m-num">b</span><span class="m-den">a</span></span><span class="m-paren">)</span>ⁿ</span></div>
+              <div class="prop-card"><span class="prop-card-tag tag-p8">P8</span><span class="prop-card-math">aᵐ/ⁿ = <span class="m-rad"><sup class="m-rad-deg">n</sup><span class="m-rad-sign">√</span><span class="m-rad-val">aᵐ</span></span></span></div>
+            </div>
+            <div style="text-align:center; padding:10px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+              <img src="propriedades_resumo.jpg" alt="Mapa Mental Exponencial" style="max-width:100%; height:auto; max-height:360px; object-fit:contain; border-radius:8px;">
+            </div>
+          `;
+        }
+      }
+      modal.classList.toggle('open');
+    }
+
+    function toggleSettingsModal() {
+      const modal = document.getElementById('settingsModal');
+      modal.classList.toggle('open');
+      if (modal.classList.contains('open')) {
+        document.getElementById('inputTeamAName').value = state.teamA.name;
+        document.getElementById('inputTeamBName').value = state.teamB.name;
+        document.getElementById('inputQuestionCount').value = state.totalQuestions;
+        document.getElementById('inputTargetScore').value = state.targetScore;
+      }
+    }
+
+    function applySettings() {
+      const nameA = document.getElementById('inputTeamAName').value.trim();
+      const nameB = document.getElementById('inputTeamBName').value.trim();
+      const qCount = parseInt(document.getElementById('inputQuestionCount').value, 10);
+      const target = parseInt(document.getElementById('inputTargetScore').value, 10);
+
+      if (nameA) state.teamA.name = nameA;
+      if (nameB) state.teamB.name = nameB;
+      if (!isNaN(qCount) && qCount > 0) state.totalQuestions = qCount;
+      if (!isNaN(target) && target > 0) state.targetScore = target;
+
+      toggleSettingsModal();
+      resetMatch(true);
+    }
+
+    function closeModalOnOverlay(e, modalId) {
+      if (e.target.id === modalId) {
+        document.getElementById(modalId).classList.remove('open');
+      }
+    }
+
+    function closeVictoryModal() {
+      document.getElementById('victoryModal').classList.remove('open');
+      stopConfetti();
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      document.getElementById('soundIcon').textContent = state.soundEnabled ? '🔊' : '🔇';
+      if (state.soundEnabled) playSound('tick');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.warn(err));
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    /* ========================================================
+       FUNÇÕES DO QUADRO DE GIZ ESCOLAR (SESSÃO DE APRENDIZADO)
+       (Aparecimento progressivo de propriedades no quadro de aula)
+       ======================================================== */
+    function openLearningModal(subject) {
+      if (subject) {
+        state.chalkSubject = subject;
+      } else if (state.subject === 'log') {
+        state.chalkSubject = 'log';
+      } else {
+        state.chalkSubject = 'exp';
+      }
+      if (!state.chalkVisibleCount || state.chalkVisibleCount < 1) {
+        state.chalkVisibleCount = 1;
+      }
+      renderChalkboard();
+      document.getElementById('learningModal').classList.add('open');
+      playSound('reveal');
+    }
+
+    function closeLearningModal() {
+      document.getElementById('learningModal').classList.remove('open');
+    }
+
+    function setChalkSubject(subj) {
+      state.chalkSubject = subj;
+      state.chalkVisibleCount = 1;
+      renderChalkboard();
+      playSound('tick');
+    }
+
+    function revealNextChalkItem() {
+      const list = CHALK_DATA[state.chalkSubject];
+      if (state.chalkVisibleCount < list.length) {
+        const nextIdx = state.chalkVisibleCount;
+        state.chalkVisibleCount++;
+        renderChalkboard(nextIdx);
+        playSound('correct');
+      } else {
+        playSound('tick');
+      }
+    }
+
+    function hidePrevChalkItem() {
+      if (state.chalkVisibleCount > 1) {
+        state.chalkVisibleCount--;
+        renderChalkboard();
+        playSound('tick');
+      }
+    }
+
+    function revealAllChalkItems() {
+      const list = CHALK_DATA[state.chalkSubject];
+      state.chalkVisibleCount = list.length;
+      renderChalkboard();
+      playSound('reveal');
+    }
+
+    function clearChalkboard() {
+      state.chalkVisibleCount = 1;
+      renderChalkboard();
+      playSound('tick');
+    }
+
+    function practiceCurrentLearnSubject() {
+      const subj = state.chalkSubject;
+      closeLearningModal();
+      setSubject(subj);
+    }
+
+    function renderChalkboard(justRevealedIdx = null) {
+      const subj = state.chalkSubject;
+      const list = CHALK_DATA[subj];
+      const grid = document.getElementById('chalkGrid');
+      if (!grid) return;
+
+      // Exponencial (8 propriedades em 2 colunas) ou Logaritmos (5 em 1 coluna larga ou 2 colunas)
+      grid.className = (subj === 'log') ? 'chalk-grid single-col' : 'chalk-grid';
+
+      // Atualiza abas de matéria
+      const tabExp = document.getElementById('chalkTabExp');
+      const tabLog = document.getElementById('chalkTabLog');
+      if (tabExp && tabLog) {
+        if (subj === 'exp') {
+          tabExp.classList.add('active');
+          tabLog.classList.remove('active');
+        } else {
+          tabExp.classList.remove('active');
+          tabLog.classList.add('active');
+        }
+      }
+
+      // Renderiza as propriedades visíveis
+      grid.innerHTML = '';
+      list.forEach((prop, idx) => {
+        if (idx >= state.chalkVisibleCount) return;
+
+        const isJustRevealed = (justRevealedIdx === idx);
+        const itemEl = document.createElement('div');
+        itemEl.className = `chalk-item revealed ${isJustRevealed ? 'just-revealed' : ''}`;
+        itemEl.id = `chalkItem_${idx}`;
+
+        itemEl.innerHTML = `
+          <div class="chalk-item-header">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="chalk-badge">${prop.badge}</span>
+              <span class="chalk-item-name">${prop.name}</span>
+            </div>
+            <span class="chalk-rule-summary">${prop.rule}</span>
+          </div>
+          <div class="chalk-formula-row">
+            <div class="chalk-math">${prop.formulaHtml}</div>
+            <span class="chalk-arrow">&rarr;</span>
+            <div class="chalk-example">${prop.exampleHtml}</div>
+          </div>
+          ${prop.caution ? `<div class="chalk-caution">⚠️ <small>${prop.caution}</small></div>` : ''}
+        `;
+
+        grid.appendChild(itemEl);
+      });
+
+      // Atualiza contador e prateleira de giz
+      const counterInfo = document.getElementById('chalkCounterInfo');
+      if (counterInfo) {
+        counterInfo.textContent = `No quadro: ${Math.min(state.chalkVisibleCount, list.length)} de ${list.length}`;
+      }
+
+      // Atualiza botão de revelar próxima
+      const btnNext = document.getElementById('btnRevealNextChalk');
+      if (btnNext) {
+        if (state.chalkVisibleCount >= list.length) {
+          btnNext.disabled = true;
+          btnNext.style.opacity = '0.55';
+          btnNext.innerHTML = '<span>✅ Quadro Completo</span>';
+        } else {
+          btnNext.disabled = false;
+          btnNext.style.opacity = '1';
+          btnNext.innerHTML = '<span>➕ Revelar Próxima [Espaço]</span>';
+        }
+      }
+
+      if (justRevealedIdx !== null) {
+        setTimeout(() => {
+          const el = document.getElementById(`chalkItem_${justRevealedIdx}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 40);
+      }
+    }
+
+    /* ========================================================
+       ATALHOS DE TECLADO
+       ======================================================== */
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+      const learnModal = document.getElementById('learningModal');
+      const isLearnOpen = learnModal && learnModal.classList.contains('open');
+
+      // Se o Quadro de Giz (Aprendizado) estiver aberto, teclas controlam as propriedades do quadro
+      if (isLearnOpen) {
+        if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowDown' || e.code === 'ArrowRight') {
+          e.preventDefault();
+          revealNextChalkItem();
+          return;
+        }
+        if (e.code === 'ArrowLeft' || e.code === 'ArrowUp' || e.code === 'Backspace') {
+          e.preventDefault();
+          hidePrevChalkItem();
+          return;
+        }
+        if (e.code === 'KeyE') {
+          e.preventDefault();
+          setChalkSubject('exp');
+          return;
+        }
+        if (e.code === 'KeyL') {
+          e.preventDefault();
+          setChalkSubject('log');
+          return;
+        }
+        if (e.code === 'KeyC') {
+          e.preventDefault();
+          clearChalkboard();
+          return;
+        }
+        if (e.code === 'KeyM') {
+          e.preventDefault();
+          revealAllChalkItems();
+          return;
+        }
+        if (e.code === 'Escape' || e.code === 'KeyA') {
+          e.preventDefault();
+          closeLearningModal();
+          return;
+        }
+        return;
+      }
+
+      switch(e.code) {
+        case 'Space':
+          e.preventDefault();
+          if (!state.isRevealed) revealAnswer();
+          break;
+        case 'ArrowRight':
+        case 'Enter':
+          e.preventDefault();
+          if (!state.isRevealed) {
+            revealAnswer();
+          } else {
+            handleAnswer(true);
+          }
+          break;
+        case 'ArrowLeft':
+        case 'Backspace':
+          e.preventDefault();
+          if (state.isRevealed) handleAnswer(false);
+          break;
+        case 'KeyA':
+          e.preventDefault();
+          openLearningModal();
+          break;
+        case 'KeyT':
+          e.preventDefault();
+          switchTurn();
+          break;
+        case 'KeyM':
+          e.preventDefault();
+          toggleMuralModal();
+          break;
+        case 'KeyS':
+          e.preventDefault();
+          toggleSound();
+          break;
+        case 'KeyF':
+          e.preventDefault();
+          toggleFullscreen();
+          break;
+        case 'Digit1':
+          loadGamePreset(1);
+          break;
+        case 'Digit2':
+          loadGamePreset(2);
+          break;
+        case 'Digit3':
+          loadGamePreset(3);
+          break;
+        case 'KeyE':
+          setSubject('exp');
+          break;
+        case 'KeyL':
+          setSubject('log');
+          break;
+        case 'KeyX':
+          setSubject('mixed');
+          break;
+        case 'Escape':
+          document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+          stopConfetti();
+          break;
+      }
+    });
+
+    /* ========================================================
+       CONFETTI DE CELEBRAÇÃO
+       ======================================================== */
+    let confettiAnimationId = null;
+    let confettiParticles = [];
+
+    function startConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      confettiParticles = [];
+      const colors = ['#3b82f6', '#ec4899', '#eab308', '#22c55e', '#8b5cf6', '#f97316'];
+
+      for (let i = 0; i < 120; i++) {
+        confettiParticles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 4,
+          vy: Math.random() * 4 + 3,
+          rot: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 8
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confettiParticles.forEach(p => {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          ctx.restore();
+
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.rotSpeed;
+
+          if (p.y > canvas.height) {
+            p.y = -10;
+            p.x = Math.random() * canvas.width;
+          }
+        });
+        confettiAnimationId = requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    function stopConfetti() {
+      if (confettiAnimationId) {
+        cancelAnimationFrame(confettiAnimationId);
+        confettiAnimationId = null;
+      }
+      const canvas = document.getElementById('confettiCanvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('confettiCanvas');
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    });
+
+    /* Inicialização no Tema Exponencial */
+    window.addEventListener('DOMContentLoaded', () => {
+      setSubject('exp');
+    });
+  </script>
+</body>
+</html>
